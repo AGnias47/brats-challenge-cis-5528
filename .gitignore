@@ -1,6 +1,12 @@
 # Virtual Environment
 venv/
 
+# Data
+local_data/
+
+# IDEs
+.idea/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
