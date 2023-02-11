@@ -1,3 +1,13 @@
+# Virtual Environment
+venv/
+
+# Data
+local_data/
+
+# IDEs
+.idea/
+.vscode/
+
 ## Core latex/pdflatex auxiliary files:
 *.lof
 *.log
