@@ -1,7 +1,6 @@
 black[d]==23.1.0
 gdown==4.6.4
 ignite==1.1.0
-jupyterlab==3.6.1
 matplotlib==3.7.0
 mlflow==2.1.1
 monai[all]==1.1.0
