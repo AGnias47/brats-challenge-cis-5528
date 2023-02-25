@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-def dataset_filepaths(directory="local_data/train"):
+def dataset_dicts(directory="local_data/train"):
     """
     Generate a list of dicts indicating the location of data locally
 
@@ -26,4 +26,5 @@ def dataset_filepaths(directory="local_data/train"):
         for scan_type in ["flair", "seg", "t1ce", "t1", "t2"]:
             data[scan_type] = f"{str(subfolder)}/{scan_name}_{scan_type}.nii.gz"
         dataset.append(data)
+        break
     return dataset
