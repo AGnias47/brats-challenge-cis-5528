@@ -1,4 +1,4 @@
-BATCH_SIZE = 4
+BATCH_SIZE = 2
 WORKERS = 4
 EPOCHS = 2
 CPU = "cpu"

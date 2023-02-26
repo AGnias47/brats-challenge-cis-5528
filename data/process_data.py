@@ -1,5 +1,5 @@
 from pathlib import Path
-from monai.data import PersistentDataset, DataLoader
+from monai.data import PersistentDataset, DataLoader, list_data_collate
 from .data_transforms import transform_function
 from config import BATCH_SIZE, LOCAL_DATA, WORKERS
 
@@ -68,4 +68,5 @@ def brats_dataloader(dataloader_type="train"):
         batch_size=BATCH_SIZE,
         shuffle=True,
         num_workers=WORKERS,
+        collate_fn=list_data_collate,
     )

@@ -7,13 +7,12 @@ def transform_function():
 
     Returns
     -------
-    function
+    function1
     """
     return mt.Compose(
         [
             mt.LoadImageD(keys=("flair", "seg")),  # Load NIFTI data
-            mt.EnsureChannelFirstD("flair"),  # Make image and label channel-first
-            mt.EnsureChannelFirstD("seg"),  # Add channel dimension to the label
+            mt.EnsureChannelFirstD(keys=("flair", "seg")),  # Make image and label channel-first
             mt.ScaleIntensityD(keys="flair"),  # Scale image intensity
             mt.ResizeD(
                 ("flair", "seg"), (64, 64, 32), mode=("trilinear", "nearest")

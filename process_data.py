@@ -35,16 +35,15 @@ device = torch.device(GPU if torch.cuda.is_available() else CPU)
 unet = UNet(
     spatial_dims=3,
     in_channels=1,
-    out_channels=3,
+    out_channels=1,
     channels=(16, 32, 64, 128, 256),
     strides=(2, 2, 2, 2),
     num_res_units=2,
-    norm=Norm.BATCH,
 ).to(device)
 trainer = SupervisedTrainer(
     device=device,
     max_epochs=EPOCHS,
-    train_data_loader=brats_dataloader(),
+    train_data_loader=brats_dataloader("train"),
     network=unet,
     optimizer=Adadelta(unet.parameters(), 1e-5),
     loss_function=DiceLoss(to_onehot_y=True, softmax=True),
