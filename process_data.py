@@ -9,17 +9,15 @@ Resources
 
 import ignite
 import monai
-from monai.engines import SupervisedTrainer
-from monai.handlers import MeanDice, from_engine, StatsHandler
 from monai.networks.nets import UNet
-from monai.networks.layers import Norm
 from monai.losses import DiceLoss
-from monai.transforms import AsDiscreteD
 import torch
 from torch.optim import Adadelta
+from torch.optim.lr_scheduler import ExponentialLR
 
 from config import CPU, EPOCHS, GPU
 from data.process_data import brats_dataloader
+from nn.nn import train
 
 monai.utils.set_determinism(seed=42, additional_settings=None)
 
@@ -40,24 +38,16 @@ unet = UNet(
     strides=(2, 2, 2, 2),
     num_res_units=2,
 ).to(device)
-trainer = SupervisedTrainer(
-    device=device,
-    max_epochs=EPOCHS,
-    train_data_loader=brats_dataloader("train"),
-    network=unet,
-    optimizer=Adadelta(unet.parameters(), 1e-5),
-    loss_function=DiceLoss(to_onehot_y=True, softmax=True),
-    prepare_batch=prepare_batch_fn,
-    postprocessing=AsDiscreteD(
-        keys=["flair", "seg"], argmax=(True, False), to_onehot=2
-    ),
-    key_train_metric={
-        "train_meandice": MeanDice(output_transform=from_engine(["flair", "seg"]))
-    },
-    train_handlers=StatsHandler(
-        tag_name="train_loss",
-        output_transform=from_engine(["loss"], first=True),
-        name="stats",
-    ),
+
+loss_function = DiceLoss(sigmoid=True)
+optimizer = Adadelta(unet.parameters(), 1e-5)
+scheduler = ExponentialLR(optimizer, gamma=0.001)
+data = brats_dataloader("train")
+model = train(
+    device,
+    unet,
+    loss_function,
+    optimizer,
+    scheduler,
+    data,
 )
-trainer.run()

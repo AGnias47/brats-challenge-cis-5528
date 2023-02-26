@@ -3,6 +3,7 @@ venv/
 
 # Data
 local_data/
+runs/
 
 # IDEs
 .idea/
