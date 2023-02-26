@@ -3,17 +3,23 @@
 """
 Resources
 ---------
-https://github.com/LucasFidon/TRABIT_BraTS2021/blob/main/src/data/brats21_dataset.py
+* https://colab.research.google.com/drive/1boqy7ENpKrqaJoxFlbHIBnIODAs1Ih1T#scrollTo=VdFXzJV-oNEM
+* https://github.com/LucasFidon/TRABIT_BraTS2021/blob/main/src/data/brats21_dataset.py
 """
 
-from monai.data import PersistentDataset
+from monai.data import PersistentDataset, DataLoader
 
+from config import BATCH_SIZE, WORKERS
 from data.process_data import dataset_dicts
 from data.data_transforms import transform_function
+from helpers.utils import seed_everything
 
 
+seed_everything(42)
 dataset = dataset_dicts()
 data_transform_function = transform_function()
 data_dict_transform = data_transform_function(dataset[0])
 print(data_dict_transform["flair"].shape, data_dict_transform["seg"].shape)
 persistent_dataset = PersistentDataset(dataset, data_transform_function, "local_data/persistent_dataset/train")
+data_loader = DataLoader(persistent_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=WORKERS)
+data = next(iter(data_loader))

@@ -1,0 +1,2 @@
+BATCH_SIZE = 4
+WORKERS = 4
