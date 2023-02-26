@@ -36,7 +36,8 @@ def dataset_dicts(data_type="train"):
 
 def brats_dataloader(dataloader_type="train"):
     """
-    Creates a DataLoader object of the BraTS dataset
+    Creates a DataLoader object of the BraTS. Combines the use of dataset generation and transform function composition
+    in the process of creating the DataLoader.
 
     Parameters
     ----------

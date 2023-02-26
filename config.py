@@ -1,5 +1,6 @@
 BATCH_SIZE = 4
 WORKERS = 4
+EPOCHS = 2
 CPU = "cpu"
 GPU = "cuda"
 LOCAL_DATA = {
