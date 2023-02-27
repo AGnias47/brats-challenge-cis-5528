@@ -15,7 +15,7 @@ def transform_function():
             mt.EnsureChannelFirstD(keys=("flair", "seg")),  # Make image and label channel-first
             mt.ScaleIntensityD(keys="flair"),  # Scale image intensity
             mt.ResizeD(
-                ("flair", "seg"), (64, 64, 32), mode=("trilinear", "nearest")
+                ("flair", "seg"), (128, 128, 64), mode=("trilinear", "nearest")
             ),  # Resize images
         ]
     )
