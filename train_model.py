@@ -76,10 +76,10 @@ for epoch in tqdm(range(EPOCHS), desc=f"Training over {EPOCHS} epochs"):
             roi_size = (96, 96, 96)
             output = sliding_window_inference(image, roi_size, 4, model)
             output = [validation_postprocessor(i) for i in decollate_batch(output)]
-            metric = validation_metric(y_pred=output, y=label)
-        metric_result = metric.aggregate.item()
-        metric.reset()
-        print(f"Epoch {epoch} Mean Dice: {metric_result:.4f}")
+            validation_metric(y_pred=output, y=label)
+        metric = validation_metric.aggregate().item()
+        validation_metric.reset()
+        print(f"Epoch {epoch} Mean Dice: {metric:.4f}")
         print("-" * 25)
         best_model_wts = None
         if metric > best_metric:
