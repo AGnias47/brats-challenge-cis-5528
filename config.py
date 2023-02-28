@@ -20,7 +20,6 @@ DATALOADER_KWARGS_CPU = {
     "num_workers": WORKERS,
     "shuffle": True,
 }
-
 DATALOADER_KWARGS_GPU = {
     "batch_size": BATCH_SIZE,
     "num_workers": WORKERS,
