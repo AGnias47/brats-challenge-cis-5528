@@ -6,7 +6,7 @@ help:	      ## Show this help message
 	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)
 
 clean:	      ## Clean the directory
-	git clean -dxf -e local_data/ -e trained-models/ -e .idea/ -e .vscode/ -e .python-version
+	git clean -dxf -e local_data/ -e model-output/ -e .idea/ -e .vscode/ -e .python-version
 
 tar:	      ## Tar the current project
 	tar --exclude="./.git" --exclude="./__pycache" -czvf project.tar .

@@ -14,18 +14,19 @@ from monai.networks.nets import UNet
 from monai.losses import DiceLoss
 from monai.transforms import Compose, Activations, AsDiscrete
 import torch
-from torch.optim import Adam
 from torch.optim.lr_scheduler import ExponentialLR
 from torch.utils.tensorboard import SummaryWriter
 
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
+from model_params import UNET
 from nn.nn import train
 
 
 monai.utils.set_determinism(seed=42, additional_settings=None)
 
 device = torch.device(GPU if torch.cuda.is_available() else CPU)
+print(f"Device: {device}")
 unet_model = UNet(
     spatial_dims=3,
     in_channels=1,
@@ -35,8 +36,8 @@ unet_model = UNet(
     num_res_units=2,
 ).to(device)
 loss_function = DiceLoss(sigmoid=True)
-optimizer = torch.optim.Adam(unet_model.parameters(), 1e-3)
-scheduler = ExponentialLR(optimizer, gamma=0.001)
+optimizer = UNET["optimizer"](unet_model.parameters(), UNET["alpha"])
+scheduler = ExponentialLR(optimizer, gamma=UNET["gamma"])
 validation_metric = DiceMetric(
     include_background=True, reduction="mean", get_not_nans=False
 )
@@ -62,4 +63,4 @@ with SummaryWriter() as summary_writer:
         epochs=EPOCHS,
     )
 
-torch.save(best_model_wts, "trained-models/unet-model")
+torch.save(best_model_wts, f"{LOCAL_DATA['model_output']}/unet-model.pth")
