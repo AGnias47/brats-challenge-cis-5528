@@ -8,7 +8,6 @@ Resources
 """
 
 import monai
-
 from monai.metrics import DiceMetric
 from monai.networks.nets import UNet
 from monai.losses import DiceLoss
