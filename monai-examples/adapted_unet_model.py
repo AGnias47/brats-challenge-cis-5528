@@ -32,7 +32,7 @@ sys.path.append("..")
 sys.path.append(".")
 
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
-from data.process_data import train_test_val_dataloaders
+from data.containers import train_test_val_dataloaders
 
 
 def main(tempdir):

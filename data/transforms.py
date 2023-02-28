@@ -7,7 +7,7 @@ def transform_function():
 
     Returns
     -------
-    function1
+    Transform
     """
     return mt.Compose(
         [
