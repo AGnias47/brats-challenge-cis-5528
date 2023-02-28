@@ -1,6 +1,8 @@
+from monai.data import list_data_collate
+
 BATCH_SIZE = 4
 WORKERS = 4
-EPOCHS = 10
+EPOCHS = 3
 TRAIN_RATIO = 0.7
 TEST_RATIO = 0.15
 VAL_RATIO = 0.15
@@ -22,4 +24,5 @@ DATALOADER_KWARGS_GPU = {
     "num_workers": WORKERS,
     "pin_memory": True,
     "shuffle": True,
+    "collate_fn": list_data_collate
 }

@@ -25,23 +25,23 @@ def train(
     for epoch in tqdm(range(epochs), desc=f"Training over {epochs} epochs"):
         for step in ["training", "validation"]:
             if step == "training":
-                running_loss = float(0)
                 model.train()
+                running_loss = 0
                 for batch in train_dataloader:
                     image, label = batch["flair"].to(device), batch["seg"].to(device)
                     optimizer.zero_grad()
-                    with torch.set_grad_enabled(True):
-                        outputs = model(image)
-                        loss = loss_function(outputs, label)
-                        loss.backward()
-                        optimizer.step()
-                    running_loss += loss.item() * image.size(0)
+                    outputs = model(image)
+                    loss = loss_function(outputs, label)
+                    loss.backward()
+                    optimizer.step()
+                    running_loss += loss.item()
                 total_loss = running_loss / (len(train_dataloader.dataset))
                 scheduler.step()
                 print(f"Epoch {epoch} Training Loss: {total_loss:.4f}")
                 print("-" * 25)
             elif epoch % 2 != 0:
                 model.eval()
+                image, label, output = None, None, None
                 with torch.no_grad():
                     for batch in validation_dataloader:
                         image, label = batch["flair"].to(device), batch["seg"].to(
@@ -60,13 +60,13 @@ def train(
                     if metric > best_metric:
                         best_metric = metric
                         best_model_wts = deepcopy(model.state_dict())
-                        plot_2d_or_3d_image(
-                            image, epoch + 1, summary_writer, index=0, tag="image"
-                        )
-                        plot_2d_or_3d_image(
-                            label, epoch + 1, summary_writer, index=0, tag="label"
-                        )
-                        plot_2d_or_3d_image(
-                            output, epoch + 1, summary_writer, index=0, tag="output"
-                        )
+                    plot_2d_or_3d_image(
+                        image, epoch + 1, summary_writer, index=0, tag="image"
+                    )
+                    plot_2d_or_3d_image(
+                        label, epoch + 1, summary_writer, index=0, tag="label"
+                    )
+                    plot_2d_or_3d_image(
+                        output, epoch + 1, summary_writer, index=0, tag="output"
+                    )
     return best_model_wts

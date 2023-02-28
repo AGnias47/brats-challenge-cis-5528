@@ -1,6 +1,6 @@
 from pathlib import Path
 from torch.utils.data import random_split
-from monai.data import PersistentDataset, DataLoader, list_data_collate
+from monai.data import PersistentDataset, Dataset, DataLoader, list_data_collate
 from .data_transforms import transform_function
 from config import BATCH_SIZE, LOCAL_DATA, WORKERS
 
@@ -34,14 +34,18 @@ def dataset_dicts(data_type="train"):
     return dataset
 
 
-def brats_dataset(dataloader_type="train"):
+def brats_dataset(dataloader_type="train", persist=False):
     dataset = dataset_dicts(dataloader_type)
     data_transform_function = transform_function()
-    return PersistentDataset(
-        data=dataset,
-        transform=data_transform_function,
-        cache_dir=f"{LOCAL_DATA['cache']}/{dataloader_type.casefold()}",
-    )
+    if persist:
+        return PersistentDataset(
+            data=dataset,
+            transform=data_transform_function,
+            cache_dir=f"{LOCAL_DATA['cache']}/{dataloader_type.casefold()}",
+        )
+
+    else:
+        return Dataset(data=dataset, transform=data_transform_function)
 
 
 def brats_dataloader(dataloader_type="train"):

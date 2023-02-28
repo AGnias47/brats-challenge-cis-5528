@@ -6,7 +6,6 @@ Resources
 * https://colab.research.google.com/drive/1boqy7ENpKrqaJoxFlbHIBnIODAs1Ih1T#scrollTo=VdFXzJV-oNEM
 * https://github.com/LucasFidon/TRABIT_BraTS2021/blob/main/src/data/brats21_dataset.py
 """
-from copy import deepcopy
 
 import monai
 
@@ -15,7 +14,7 @@ from monai.networks.nets import UNet
 from monai.losses import DiceLoss
 from monai.transforms import Compose, Activations, AsDiscrete
 import torch
-from torch.optim import Adadelta
+from torch.optim import Adam
 from torch.optim.lr_scheduler import ExponentialLR
 from torch.utils.tensorboard import SummaryWriter
 
@@ -36,7 +35,7 @@ unet_model = UNet(
     num_res_units=2,
 ).to(device)
 loss_function = DiceLoss(sigmoid=True)
-optimizer = Adadelta(unet_model.parameters(), 1e-5)
+optimizer = torch.optim.Adam(unet_model.parameters(), 1e-3)
 scheduler = ExponentialLR(optimizer, gamma=0.001)
 validation_metric = DiceMetric(
     include_background=True, reduction="mean", get_not_nans=False
@@ -48,19 +47,19 @@ dataloader_kwargs = DATALOADER_KWARGS_GPU if device == "GPU" else DATALOADER_KWA
 train_dataloader, test_dataloader, validation_dataloader = train_test_val_dataloaders(
     TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs
 )
-summary_writer = SummaryWriter()
-best_model_wts = train(
-    device=device,
-    model=unet_model,
-    loss_function=loss_function,
-    optimizer=optimizer,
-    scheduler=scheduler,
-    validation_metric=validation_metric,
-    validation_postprocessor=validation_postprocessor,
-    train_dataloader=train_dataloader,
-    validation_dataloader=validation_dataloader,
-    summary_writer=summary_writer,
-    epochs=EPOCHS,
-)
+with SummaryWriter() as summary_writer:
+    best_model_wts = train(
+        device=device,
+        model=unet_model,
+        loss_function=loss_function,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        validation_metric=validation_metric,
+        validation_postprocessor=validation_postprocessor,
+        train_dataloader=train_dataloader,
+        validation_dataloader=validation_dataloader,
+        summary_writer=summary_writer,
+        epochs=EPOCHS,
+    )
 
 torch.save(best_model_wts, "trained-models/unet-model")
