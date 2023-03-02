@@ -18,7 +18,7 @@ from torch.optim.lr_scheduler import ExponentialLR
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
 from model_params import UNET
-from nn.nn import train
+from nn.nnet import NNet
 
 if USE_SUMMARY_WRITER:
     from torch.utils.tensorboard import SummaryWriter
@@ -50,34 +50,26 @@ train_dataloader, test_dataloader, validation_dataloader = train_test_val_datalo
     TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs
 )
 
+nnet = NNet(unet_model, loss_function, optimizer, scheduler)
+
+
 if USE_SUMMARY_WRITER:
     with SummaryWriter() as summary_writer:
-        best_model_wts = train(
-            device=device,
-            model=unet_model,
-            loss_function=loss_function,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            validation_metric=validation_metric,
-            validation_postprocessor=validation_postprocessor,
-            train_dataloader=train_dataloader,
-            validation_dataloader=validation_dataloader,
-            summary_writer=summary_writer,
-            epochs=EPOCHS,
+        nnet.run_training(
+            train_dataloader,
+            validation_dataloader,
+            validation_postprocessor,
+            validation_metric,
+            EPOCHS,
+            summary_writer,
         )
 else:
-    best_model_wts = train(
-        device=device,
-        model=unet_model,
-        loss_function=loss_function,
-        optimizer=optimizer,
-        scheduler=scheduler,
-        validation_metric=validation_metric,
-        validation_postprocessor=validation_postprocessor,
-        train_dataloader=train_dataloader,
-        validation_dataloader=validation_dataloader,
-        summary_writer=None,
-        epochs=EPOCHS,
+    nnet.run_training(
+        train_dataloader,
+        validation_dataloader,
+        validation_postprocessor,
+        validation_metric,
+        EPOCHS,
     )
 
-torch.save(best_model_wts, f"{LOCAL_DATA['model_output']}/unet-model.pth")
+nnet.save_model(f"{LOCAL_DATA['model_output']}/unet-model.pth")
