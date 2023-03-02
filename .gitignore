@@ -4,7 +4,7 @@ venv/
 # Data
 local_data/
 runs/
-trained-models/
+model-output/
 
 # IDEs
 .idea/
