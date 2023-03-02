@@ -1,22 +1,18 @@
 from monai.data import list_data_collate
 
-BATCH_SIZE = 4
-WORKERS = 4
-EPOCHS = 4
+# Training parameters
 TRAIN_RATIO = 0.7
 TEST_RATIO = 0.15
 VAL_RATIO = 0.15
+
+# Dataset parameters
 PERSIST_DATASET = False
-USE_SUMMARY_WRITER = True
-CPU = "cpu"
-GPU = "cuda"
-LOCAL_DATA = {
-    "train": "local_data/train",
-    "validation": "local_data/validation",
-    "cache": "local_data/persistent_dataset",
-    "model_output": "model-output",
-    "tensorboard_logs": "runs"
-}
+IMAGE_RESOLUTION = (128, 128, 64)
+RESIZING_ALGORITHM = ("trilinear", "nearest-exact")
+
+# Dataloader parameters
+BATCH_SIZE = 4
+WORKERS = 4
 DATALOADER_KWARGS_CPU = {
     "batch_size": BATCH_SIZE,
     "num_workers": WORKERS,
@@ -28,4 +24,16 @@ DATALOADER_KWARGS_GPU = {
     "pin_memory": True,
     "shuffle": True,
     "collate_fn": list_data_collate
+}
+
+# Logging parameters
+USE_SUMMARY_WRITER = True
+
+# Filepath parameters
+LOCAL_DATA = {
+    "train": "local_data/train",
+    "validation": "local_data/validation",
+    "cache": "local_data/persistent_dataset",
+    "model_output": "model-output",
+    "tensorboard_logs": "runs"
 }

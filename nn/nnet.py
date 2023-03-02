@@ -5,16 +5,17 @@ from monai.inferers import sliding_window_inference
 from monai.visualize import plot_2d_or_3d_image
 import torch
 import torch.optim
+from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import tqdm
 
 
 class NNet:
-    def __init__(self, model, loss_function, optimizer, scheduler):
+    def __init__(self, model, loss_function, optimizer, alpha, gamma):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = model
+        self.model = model.to(self.device)
         self.lf = loss_function
-        self.optim = optimizer
-        self.scheduler = scheduler
+        self.optim = optimizer(self.model.parameters(), alpha)
+        self.scheduler = ExponentialLR(self.optim, gamma)
         self.best_model_weights = None
 
     def run_training(
