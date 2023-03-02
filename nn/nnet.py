@@ -12,6 +12,7 @@ from tqdm import tqdm
 class NNet:
     def __init__(self, model, loss_function, optimizer, alpha, gamma):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.name = ""
         self.model = model.to(self.device)
         self.lf = loss_function
         self.optim = optimizer(self.model.parameters(), alpha)

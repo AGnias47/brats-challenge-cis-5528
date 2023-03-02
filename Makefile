@@ -18,4 +18,4 @@ results:      ## See Neural Net results via Tensorboard
 	tensorboard --logdir runs
 
 unet:         ## Train UNet model
-	./train_unet.py
+	./train_model.py -m unet

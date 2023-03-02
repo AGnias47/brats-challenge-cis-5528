@@ -26,9 +26,6 @@ DATALOADER_KWARGS_GPU = {
     "collate_fn": list_data_collate
 }
 
-# Logging parameters
-USE_SUMMARY_WRITER = True
-
 # Filepath parameters
 LOCAL_DATA = {
     "train": "local_data/train",
