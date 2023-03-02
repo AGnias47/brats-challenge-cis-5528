@@ -54,7 +54,7 @@ nnet = NNet(unet_model, loss_function, optimizer, scheduler)
 
 
 if USE_SUMMARY_WRITER:
-    with SummaryWriter() as summary_writer:
+    with SummaryWriter(LOCAL_DATA["tensorboard_logs"]) as summary_writer:
         nnet.run_training(
             train_dataloader,
             validation_dataloader,

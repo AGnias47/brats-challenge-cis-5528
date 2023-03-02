@@ -1,6 +1,6 @@
 PYTHON=python3
 
-.PHONY: help clean tar format results report view_report static
+.PHONY: help clean tar format results unet
 
 help:	      ## Show this help message
 	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)
@@ -16,3 +16,6 @@ format:	      ## Format python files in place with black formatter
 
 results:      ## See Neural Net results via Tensorboard
 	tensorboard --logdir runs
+
+unet:         ## Train UNet model
+	./train_unet.py
