@@ -10,7 +10,7 @@ Resources
 import monai
 from monai.metrics import DiceMetric
 from monai.networks.nets import UNet
-from monai.losses import DiceLoss
+from monai.losses import DiceCELoss
 from monai.transforms import Compose, Activations, AsDiscrete
 import torch
 from torch.optim.lr_scheduler import ExponentialLR
@@ -36,7 +36,7 @@ unet_model = UNet(
     strides=(2, 2, 2, 2),
     num_res_units=2,
 ).to(device)
-loss_function = DiceLoss(sigmoid=True)
+loss_function = DiceCELoss(sigmoid=True)
 optimizer = UNET["optimizer"](unet_model.parameters(), UNET["alpha"])
 scheduler = ExponentialLR(optimizer, gamma=UNET["gamma"])
 validation_metric = DiceMetric(

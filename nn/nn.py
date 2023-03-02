@@ -30,10 +30,11 @@ def train(
                 for batch in train_dataloader:
                     image, label = batch["flair"].to(device), batch["seg"].to(device)
                     optimizer.zero_grad()
-                    outputs = model(image)
-                    loss = loss_function(outputs, label)
-                    loss.backward()
-                    optimizer.step()
+                    with torch.set_grad_enabled(True):
+                        outputs = model(image)
+                        loss = loss_function(outputs, label)
+                        loss.backward()
+                        optimizer.step()
                     running_loss += loss.item()
                 total_loss = running_loss / (len(train_dataloader.dataset))
                 if summary_writer:
