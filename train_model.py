@@ -14,12 +14,14 @@ from monai.losses import DiceLoss
 from monai.transforms import Compose, Activations, AsDiscrete
 import torch
 from torch.optim.lr_scheduler import ExponentialLR
-from torch.utils.tensorboard import SummaryWriter
 
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
 from model_params import UNET
 from nn.nn import train
+
+if USE_SUMMARY_WRITER:
+    from torch.utils.tensorboard import SummaryWriter
 
 
 monai.utils.set_determinism(seed=42, additional_settings=None)
@@ -47,7 +49,23 @@ dataloader_kwargs = DATALOADER_KWARGS_GPU if device == "GPU" else DATALOADER_KWA
 train_dataloader, test_dataloader, validation_dataloader = train_test_val_dataloaders(
     TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs
 )
-with SummaryWriter() as summary_writer:
+
+if USE_SUMMARY_WRITER:
+    with SummaryWriter() as summary_writer:
+        best_model_wts = train(
+            device=device,
+            model=unet_model,
+            loss_function=loss_function,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            validation_metric=validation_metric,
+            validation_postprocessor=validation_postprocessor,
+            train_dataloader=train_dataloader,
+            validation_dataloader=validation_dataloader,
+            summary_writer=summary_writer,
+            epochs=EPOCHS,
+        )
+else:
     best_model_wts = train(
         device=device,
         model=unet_model,
@@ -58,7 +76,7 @@ with SummaryWriter() as summary_writer:
         validation_postprocessor=validation_postprocessor,
         train_dataloader=train_dataloader,
         validation_dataloader=validation_dataloader,
-        summary_writer=summary_writer,
+        summary_writer=None,
         epochs=EPOCHS,
     )
 

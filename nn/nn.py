@@ -36,7 +36,8 @@ def train(
                     optimizer.step()
                     running_loss += loss.item()
                 total_loss = running_loss / (len(train_dataloader.dataset))
-                summary_writer.add_scalar("training_loss", total_loss, epoch)
+                if summary_writer:
+                    summary_writer.add_scalar("training_loss", total_loss, epoch)
                 scheduler.step()
                 print(f"Epoch {epoch} Training Loss: {total_loss:.4f}")
                 print("-" * 25)
@@ -61,14 +62,16 @@ def train(
                     if metric > best_metric:
                         best_metric = metric
                         best_model_wts = deepcopy(model.state_dict())
-                        plot_2d_or_3d_image(
-                            image, epoch + 1, summary_writer, index=0, tag="image"
-                        )
-                        plot_2d_or_3d_image(
-                            label, epoch + 1, summary_writer, index=0, tag="label"
-                        )
-                        plot_2d_or_3d_image(
-                            output, epoch + 1, summary_writer, index=0, tag="output"
-                        )
-                    summary_writer.add_scalar("validation_mean_dice", metric, epoch)
+                        if summary_writer:
+                            plot_2d_or_3d_image(
+                                image, epoch + 1, summary_writer, index=0, tag="image"
+                            )
+                            plot_2d_or_3d_image(
+                                label, epoch + 1, summary_writer, index=0, tag="label"
+                            )
+                            plot_2d_or_3d_image(
+                                output, epoch + 1, summary_writer, index=0, tag="output"
+                            )
+                    if summary_writer:
+                        summary_writer.add_scalar("validation_mean_dice", metric, epoch)
     return best_model_wts
