@@ -5,7 +5,7 @@ from .transforms import transform_function
 from config import LOCAL_DATA, PERSIST_DATASET
 
 
-def dataset_dicts(data_type="train"):
+def dataset_dicts(data_type="train", dataset_path=None):
     """
     Generate a list of dicts indicating the location of data locally
 
@@ -15,6 +15,8 @@ def dataset_dicts(data_type="train"):
         train: BraTS training data containing seg files
         validation: BraTS validation data without seg files
         other: will throw an error
+    dataset_path: str
+        Path to data; if not defined, uses LOCAL_DATA[data_type]
 
     config.py values used
     ---------------------
@@ -35,7 +37,9 @@ def dataset_dicts(data_type="train"):
     scan_types = ["flair", "t1ce", "t1", "t2"]
     if data_type.casefold() == "train":
         scan_types.append("seg")
-    for subfolder in Path(LOCAL_DATA[data_type.casefold()]).iterdir():
+    if not dataset_path:
+        dataset_path = LOCAL_DATA[data_type.casefold()]
+    for subfolder in Path(dataset_path).iterdir():
         scan_name = subfolder.name
         data = {"name": scan_name}
         for scan_type in scan_types:
@@ -44,7 +48,7 @@ def dataset_dicts(data_type="train"):
     return dataset
 
 
-def brats_dataset(data_type):
+def brats_dataset(data_type, dataset_path=None):
     """
     Returns a BraTS Dataset object
 
@@ -54,6 +58,8 @@ def brats_dataset(data_type):
         train: BraTS training data containing seg files
         validation: BraTS validation data without seg files
         other: will throw an error
+    dataset_path: str
+        Path to data; if not defined, uses LOCAL_DATA[data_type]
 
     config.py values used
     ---------------------
@@ -68,7 +74,7 @@ def brats_dataset(data_type):
     -------
     Dataset
     """
-    dataset = dataset_dicts(data_type)
+    dataset = dataset_dicts(data_type, dataset_path)
     data_transform_function = transform_function()
     if PERSIST_DATASET:
         return PersistentDataset(
@@ -80,7 +86,7 @@ def brats_dataset(data_type):
         return Dataset(data=dataset, transform=data_transform_function)
 
 
-def train_test_val_dataloaders(train_ratio, test_ratio, val_ratio, dataloader_kwargs):
+def train_test_val_dataloaders(train_ratio, test_ratio, val_ratio, dataloader_kwargs, dataset_path=None):
     """
     Creates a train, test, and validation DataLoader objects of the BraTS dataset. Combines the use of dataset
     generation and transform function composition in the process of creating the DataLoaders.
@@ -91,6 +97,8 @@ def train_test_val_dataloaders(train_ratio, test_ratio, val_ratio, dataloader_kw
     test_ratio: float
     val_ratio: float
     dataloader_kwargs: dict
+    dataset_path: str
+        Path to data; if not defined, uses LOCAL_DATA[data_type]
 
     Returns
     -------
@@ -99,7 +107,7 @@ def train_test_val_dataloaders(train_ratio, test_ratio, val_ratio, dataloader_kw
     ratio_total = train_ratio + test_ratio + val_ratio
     if ratio_total < 0.99 or ratio_total > 1.01:
         raise ValueError("Invalid train-test-val ratios provided")
-    dataset = brats_dataset("train")
+    dataset = brats_dataset("train", dataset_path)
     train, test, val = random_split(dataset, [train_ratio, test_ratio, val_ratio])
     return (
         DataLoader(train, **dataloader_kwargs),

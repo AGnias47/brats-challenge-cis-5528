@@ -48,7 +48,7 @@ else:
     raise ValueError("Invalid model type specified")
 
 train_dataloader, test_dataloader, validation_dataloader = train_test_val_dataloaders(
-    TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs
+    TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs,
 )
 validation_metric = DiceMetric(
     include_background=True, reduction="mean", get_not_nans=False

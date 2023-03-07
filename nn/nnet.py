@@ -78,7 +78,7 @@ class NNet:
             for batch in dataloader:
                 image, label = batch["flair"].to(self.device), batch["seg"].to(
                     self.device
-                )
+                )  # torch.Size([3, 1, 128, 128, 64])
                 roi_size = (96, 96, 96)
                 output = sliding_window_inference(image, roi_size, 4, self.model)
                 output = [postproc_func(i) for i in decollate_batch(output)]
