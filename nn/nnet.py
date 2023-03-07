@@ -81,8 +81,11 @@ class NNet:
                 )  # torch.Size([3, 1, 128, 128, 64])
                 roi_size = (96, 96, 96)
                 output = sliding_window_inference(image, roi_size, 4, self.model)
-                output = [postproc_func(i) for i in decollate_batch(output)]
-                val_metric(y_pred=output, y=label)
+                output = torch.stack(
+                    [postproc_func(i) for i in decollate_batch(output)]
+                )
+                binarized_y = (label > 0.5).float()
+                val_metric(y_pred=output, y=binarized_y)
             metric = val_metric.aggregate().item()
             val_metric.reset()
             if epoch is not None:
@@ -95,11 +98,12 @@ class NNet:
                         image, epoch + 1, summary_writer, index=0, tag="image"
                     )
                     plot_2d_or_3d_image(
-                        label, epoch + 1, summary_writer, index=0, tag="label"
+                        output, epoch + 1, summary_writer, index=0, tag="label"
                     )
                     plot_2d_or_3d_image(
-                        output, epoch + 1, summary_writer, index=0, tag="output"
+                        label, epoch + 1, summary_writer, index=0, tag="true_label"
                     )
+
             if summary_writer:
                 summary_writer.add_scalar("validation_mean_dice", metric, epoch)
         return best_metric
