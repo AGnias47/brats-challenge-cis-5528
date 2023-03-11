@@ -52,7 +52,7 @@ class NNet:
         self.model.train()
         running_loss = 0
         for batch in dataloader:
-            image, label = batch["flair"].to(self.device), batch["seg"].to(self.device)
+            image, label = batch["image"].to(self.device), batch["label"].to(self.device)
             self.optim.zero_grad()
             with torch.set_grad_enabled(True):
                 outputs = self.model(image)
@@ -81,7 +81,7 @@ class NNet:
         image, label, output = None, None, None
         with torch.no_grad():
             for batch in dataloader:
-                image, label = batch["flair"].to(self.device), batch["seg"].to(
+                image, label = batch["image"].to(self.device), batch["label"].to(
                     self.device
                 )  # torch.Size([3, 1, 128, 128, 64])
                 roi_size = (96, 96, 96)

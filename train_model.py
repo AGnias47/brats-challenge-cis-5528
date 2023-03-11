@@ -26,6 +26,12 @@ parser.add_argument(
     "-e", "--epochs", help="Number of training epochs to use", type=int, default=5
 )
 parser.add_argument(
+    "-i",
+    "--image_key",
+    help="Image key corresponding to type; one of [flair, t1ce, t1, t2]",
+    default="flair",
+)
+parser.add_argument(
     "-s",
     "--use-summary-writer",
     help="Flag to log data to Tensorboard (default is True)",
@@ -48,7 +54,7 @@ else:
     raise ValueError("Invalid model type specified")
 
 train_dataloader, test_dataloader, validation_dataloader = train_test_val_dataloaders(
-    TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs,
+    TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, args.image_key, "seg"
 )
 validation_metric = DiceMetric(
     include_background=True, reduction="mean", get_not_nans=False

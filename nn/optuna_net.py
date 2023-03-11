@@ -27,4 +27,3 @@ class OptunaNet(NNet):
             ],
         )
         return getattr(optim, optimizer_name)
-

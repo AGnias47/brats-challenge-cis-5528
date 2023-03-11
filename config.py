@@ -8,7 +8,6 @@ VAL_RATIO = 0.15
 # Dataset parameters
 PERSIST_DATASET = False
 IMAGE_RESOLUTION = (128, 128, 64)
-RESIZING_ALGORITHM = ("trilinear", "nearest-exact")
 
 # Dataloader parameters
 BATCH_SIZE = 4
