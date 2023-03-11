@@ -30,6 +30,6 @@ LOCAL_DATA = {
     "train": "local_data/train",
     "validation": "local_data/validation",
     "cache": "local_data/persistent_dataset",
-    "model_output": "model-output",
+    "model_output": "trained_models",
     "tensorboard_logs": "runs"
 }

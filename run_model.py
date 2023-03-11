@@ -20,7 +20,7 @@ from data.containers import train_test_val_dataloaders
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-m", "--model_path", type=str, default="model-output/unet-model.pth"
+        "-m", "--model_path", type=str, default="trained_models/unet-model.pth"
     )
     parser.add_argument(
         "-i",
