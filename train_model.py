@@ -10,8 +10,6 @@ Resources
 import argparse
 
 import monai
-from monai.metrics import DiceMetric
-from monai.transforms import Compose, Activations, AsDiscrete
 import torch
 
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
@@ -56,13 +54,6 @@ else:
 train_dataloader, test_dataloader, validation_dataloader = train_test_val_dataloaders(
     TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, args.image_key, "seg"
 )
-validation_metric = DiceMetric(
-    include_background=True, reduction="mean", get_not_nans=False
-)
-validation_postprocessor = Compose(
-    [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
-)
-
 if args.use_summary_writer:
     from torch.utils.tensorboard import SummaryWriter
 
@@ -70,8 +61,6 @@ if args.use_summary_writer:
         nnet.run_training(
             train_dataloader,
             validation_dataloader,
-            validation_postprocessor,
-            validation_metric,
             args.epochs,
             summary_writer,
         )
@@ -79,8 +68,6 @@ else:
     nnet.run_training(
         train_dataloader,
         validation_dataloader,
-        validation_postprocessor,
-        validation_metric,
         args.epochs,
     )
 

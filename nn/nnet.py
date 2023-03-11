@@ -3,11 +3,14 @@ from copy import deepcopy
 from monai.data import decollate_batch
 from monai.inferers import sliding_window_inference
 from monai.losses import DiceCELoss
+from monai.metrics import DiceMetric
 from monai.visualize import plot_2d_or_3d_image
 import torch
 import torch.optim
 from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import tqdm
+
+from data.transforms import validation_postprocessor
 
 
 class NNet:
@@ -16,6 +19,10 @@ class NNet:
         self.name = ""
         self.model = model.to(self.device)
         self.lf = DiceCELoss(sigmoid=True)
+        self.postproc_func = validation_postprocessor()
+        self.val_metric = DiceMetric(
+            include_background=True, reduction="mean", get_not_nans=False
+        )
         try:
             self.optim = optimizer(self.model.parameters(), alpha)
         except TypeError:
@@ -27,8 +34,6 @@ class NNet:
         self,
         train_dataloader,
         val_dataloader,
-        postproc_func,
-        val_metric,
         epochs,
         summary_writer=None,
     ):
@@ -37,8 +42,6 @@ class NNet:
             self._train(train_dataloader, epoch, summary_writer)
             best_metric = self._validation(
                 val_dataloader,
-                postproc_func,
-                val_metric,
                 best_metric,
                 epoch,
                 summary_writer,
@@ -52,7 +55,9 @@ class NNet:
         self.model.train()
         running_loss = 0
         for batch in dataloader:
-            image, label = batch["image"].to(self.device), batch["label"].to(self.device)
+            image, label = batch["image"].to(self.device), batch["label"].to(
+                self.device
+            )
             self.optim.zero_grad()
             with torch.set_grad_enabled(True):
                 outputs = self.model(image)
@@ -71,8 +76,6 @@ class NNet:
     def _validation(
         self,
         dataloader,
-        postproc_func,
-        val_metric,
         best_metric,
         epoch=None,
         summary_writer=None,
@@ -87,12 +90,12 @@ class NNet:
                 roi_size = (96, 96, 96)
                 output = sliding_window_inference(image, roi_size, 4, self.model)
                 output = torch.stack(
-                    [postproc_func(i) for i in decollate_batch(output)]
+                    [self.postproc_func(i) for i in decollate_batch(output)]
                 )
-                binarized_y = [postproc_func(i) for i in decollate_batch(label)]
-                val_metric(y_pred=output, y=binarized_y)
-            metric = val_metric.aggregate().item()
-            val_metric.reset()
+                binarized_y = [self.postproc_func(i) for i in decollate_batch(label)]
+                self.val_metric(y_pred=output, y=binarized_y)
+            metric = self.val_metric.aggregate().item()
+            self.val_metric.reset()
             if epoch is not None:
                 print(f"Epoch {epoch} Mean Dice: {metric:.4f}")
                 print("-" * 25)

@@ -18,7 +18,9 @@ def dict_transform_function():
             ),  # Make image and label channel-first
             mt.ScaleIntensityD(keys="image"),  # Scale image intensity
             mt.ResizeD(
-                ("image", "label"), IMAGE_RESOLUTION, mode=("trilinear", "nearest-exact")
+                ("image", "label"),
+                IMAGE_RESOLUTION,
+                mode=("trilinear", "nearest-exact"),
             ),  # Resize images
         ]
     )
@@ -32,3 +34,7 @@ def single_image_transform_function():
             mt.Resize(IMAGE_RESOLUTION),  # Resize images
         ]
     )
+
+
+def validation_postprocessor():
+    return mt.Compose([mt.Activations(sigmoid=True), mt.AsDiscrete(threshold=0.5)])
