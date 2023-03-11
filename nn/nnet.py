@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from monai.data import decollate_batch
 from monai.inferers import sliding_window_inference
+from monai.losses import DiceCELoss
 from monai.visualize import plot_2d_or_3d_image
 import torch
 import torch.optim
@@ -10,12 +11,15 @@ from tqdm import tqdm
 
 
 class NNet:
-    def __init__(self, model, loss_function, optimizer, alpha, gamma):
+    def __init__(self, model, optimizer, alpha, gamma):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.name = ""
         self.model = model.to(self.device)
-        self.lf = loss_function
-        self.optim = optimizer(self.model.parameters(), alpha)
+        self.lf = DiceCELoss(sigmoid=True)
+        try:
+            self.optim = optimizer(self.model.parameters(), alpha)
+        except TypeError:
+            self.optim = optimizer(self.model.parameters())
         self.scheduler = ExponentialLR(self.optim, gamma)
         self.best_model_weights = None
 
@@ -39,6 +43,7 @@ class NNet:
                 epoch,
                 summary_writer,
             )
+        return best_metric
 
     def save_model(self, filepath):
         torch.save(self.best_model_weights, filepath)
