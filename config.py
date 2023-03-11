@@ -22,7 +22,7 @@ DATALOADER_KWARGS_GPU = {
     "num_workers": WORKERS,
     "pin_memory": True,
     "shuffle": True,
-    "collate_fn": list_data_collate
+    "collate_fn": list_data_collate,
 }
 
 # Filepath parameters
@@ -31,5 +31,5 @@ LOCAL_DATA = {
     "validation": "local_data/validation",
     "cache": "local_data/persistent_dataset",
     "model_output": "trained_models",
-    "tensorboard_logs": "runs"
+    "tensorboard_logs": "runs",
 }

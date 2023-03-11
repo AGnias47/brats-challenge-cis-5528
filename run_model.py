@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 """
+run_model.py - Runs segmentation on a trained model
 
-Refs
-https://github.com/Project-MONAI/tutorials/blob/main/3d_segmentation/brats_segmentation_3d.ipynb
+References
+----------
+* https://github.com/Project-MONAI/tutorials/blob/main/3d_segmentation/brats_segmentation_3d.ipynb
 """
+
 import argparse
 
 import matplotlib.pyplot as plt
@@ -14,8 +17,10 @@ from monai.networks.nets import UNet as MonaiUNet
 import torch
 
 from data.transforms import single_image_transform_function, validation_postprocessor
-from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
-from data.containers import train_test_val_dataloaders
+
+SLICES = 64
+SLICES_TO_SHOW = 4
+SLICE_GAP = SLICES // SLICES_TO_SHOW
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -47,20 +52,17 @@ if __name__ == "__main__":
         model.eval()
         output = sliding_window_inference(image, (96, 96, 96), 1, model)
         processed_output = validation_postprocessor()(output[0]).to("cpu")
-    slices = 64
-    slices_to_show = 4
-    slice_gap = slices // slices_to_show
-    fig, ax = plt.subplots(slices_to_show-1, 2, figsize=(5, 8))
-    for i, s in enumerate(range(slice_gap, slices-1, slice_gap)):
+    fig, ax = plt.subplots(SLICES_TO_SHOW - 1, 2, figsize=(5, 8))
+    for i, s in enumerate(range(SLICE_GAP, SLICES - 1, SLICE_GAP)):
         ax[i, 0].imshow(transformed_image[0, :, :, s], cmap="gray")
-        if s == slice_gap:
-            ax[i, 0].set_title(f"Input Images\n")
+        if s == SLICE_GAP:
+            ax[i, 0].set_title("Input Images\n")
         ax[i, 0].set_xlabel(f"Slice {s}")
         ax[i, 0].set_xticks([])
         ax[i, 0].set_yticks([])
         ax[i, 1].imshow(processed_output[0, :, :, s].detach().cpu())
-        if s == slice_gap:
-            ax[i, 1].set_title(f"Segmentations\n")
+        if s == SLICE_GAP:
+            ax[i, 1].set_title("Segmentations\n")
         ax[i, 1].set_xlabel(f"Slice {s}")
         ax[i, 1].set_xticks([])
         ax[i, 1].set_yticks([])

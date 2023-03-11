@@ -89,8 +89,7 @@ def brats_dataset(data_type, image_key, label_key, dataset_path=None):
             transform=data_transform_function,
             cache_dir=f"{LOCAL_DATA['cache']}/{data_type.casefold()}",
         )
-    else:
-        return Dataset(data=dataset, transform=data_transform_function)
+    return Dataset(data=dataset, transform=data_transform_function)
 
 
 def train_test_val_dataloaders(

@@ -20,9 +20,7 @@ class NNet:
         self.model = model.to(self.device)
         self.lf = DiceCELoss(sigmoid=True)
         self.postproc_func = validation_postprocessor()
-        self.val_metric = DiceMetric(
-            include_background=True, reduction="mean", get_not_nans=False
-        )
+        self.val_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
         try:
             self.optim = optimizer(self.model.parameters(), alpha)
         except TypeError:
@@ -55,9 +53,7 @@ class NNet:
         self.model.train()
         running_loss = 0
         for batch in dataloader:
-            image, label = batch["image"].to(self.device), batch["label"].to(
-                self.device
-            )
+            image, label = batch["image"].to(self.device), batch["label"].to(self.device)
             self.optim.zero_grad()
             with torch.set_grad_enabled(True):
                 outputs = self.model(image)
@@ -89,9 +85,7 @@ class NNet:
                 )  # torch.Size([3, 1, 128, 128, 64])
                 roi_size = (96, 96, 96)
                 output = sliding_window_inference(image, roi_size, 4, self.model)
-                output = torch.stack(
-                    [self.postproc_func(i) for i in decollate_batch(output)]
-                )
+                output = torch.stack([self.postproc_func(i) for i in decollate_batch(output)])
                 binarized_y = [self.postproc_func(i) for i in decollate_batch(label)]
                 self.val_metric(y_pred=output, y=binarized_y)
             metric = self.val_metric.aggregate().item()
@@ -103,15 +97,9 @@ class NNet:
                 best_metric = metric
                 self.best_model_weights = deepcopy(self.model.state_dict())
                 if summary_writer and epoch is not None:
-                    plot_2d_or_3d_image(
-                        image, epoch + 1, summary_writer, index=0, tag="image"
-                    )
-                    plot_2d_or_3d_image(
-                        output, epoch + 1, summary_writer, index=0, tag="label"
-                    )
-                    plot_2d_or_3d_image(
-                        label, epoch + 1, summary_writer, index=0, tag="true_label"
-                    )
+                    plot_2d_or_3d_image(image, epoch + 1, summary_writer, index=0, tag="image")
+                    plot_2d_or_3d_image(output, epoch + 1, summary_writer, index=0, tag="label")
+                    plot_2d_or_3d_image(label, epoch + 1, summary_writer, index=0, tag="true_label")
 
             if summary_writer:
                 summary_writer.add_scalar("validation_mean_dice", metric, epoch)

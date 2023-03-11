@@ -13,9 +13,7 @@ def dict_transform_function():
     return mt.Compose(
         [
             mt.LoadImageD(keys=("image", "label")),  # Load NIFTI data
-            mt.EnsureChannelFirstD(
-                keys=("image", "label")
-            ),  # Make image and label channel-first
+            mt.EnsureChannelFirstD(keys=("image", "label")),  # Make image and label channel-first
             mt.ScaleIntensityD(keys="image"),  # Scale image intensity
             mt.ResizeD(
                 ("image", "label"),

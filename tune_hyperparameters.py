@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
+"""
+tune_hyperparameters.py - Uses Optuna to determine ideal model hyperparameters
+"""
 
 import argparse
 
 import monai
-from monai.metrics import DiceMetric
 from monai.networks.nets import UNet as MonaiUNet
-from monai.transforms import Compose, Activations, AsDiscrete
 import optuna
 from optuna.integration.mlflow import MLflowCallback
 import torch
@@ -36,17 +37,9 @@ def objective(trial):
     train, _, val = train_test_val_dataloaders(
         TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, image_key, "seg"
     )
-    validation_metric = DiceMetric(
-        include_background=True, reduction="mean", get_not_nans=False
-    )
-    validation_postprocessor = Compose(
-        [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
-    )
     return model.run_training(
         train,
         val,
-        validation_postprocessor,
-        validation_metric,
         args.epochs,
     )
 
