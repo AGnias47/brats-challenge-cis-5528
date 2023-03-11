@@ -14,10 +14,10 @@ import torch
 
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
-from nn.optuna_net import OptunaNet
+from nn.optunet import Optunet
 
 
-class OptunaUnet(OptunaNet):
+class OptunaUnet(Optunet):
     def __init__(self, trial):
         self.name = "optuna_unet"
         model = MonaiUNet(

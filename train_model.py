@@ -17,8 +17,12 @@ from data.containers import train_test_val_dataloaders
 from nn.unet import UNet
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--model", help="Neural Network type to use; one of [unet]", default="unet")
-parser.add_argument("-e", "--epochs", help="Number of training epochs to use", type=int, default=5)
+parser.add_argument(
+    "-m", "--model", help="Neural Network type to use; one of [unet]", default="unet"
+)
+parser.add_argument(
+    "-e", "--epochs", help="Number of training epochs to use", type=int, default=5
+)
 parser.add_argument(
     "-i",
     "--image_key",

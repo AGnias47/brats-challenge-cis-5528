@@ -16,7 +16,6 @@ from data.transforms import validation_postprocessor
 class NNet:
     def __init__(self, model, optimizer, alpha, gamma):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.name = ""
         self.model = model.to(self.device)
         self.lf = DiceCELoss(sigmoid=True)
         self.postproc_func = validation_postprocessor()

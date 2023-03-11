@@ -3,7 +3,7 @@ from torch import optim
 from .nnet import NNet
 
 
-class OptunaNet(NNet):
+class Optunet(NNet):
     def __init__(self, trial, model):
         self.trial = trial
         optimizer = self.select_optimizer()

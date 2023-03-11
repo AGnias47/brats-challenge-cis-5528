@@ -1,21 +1,24 @@
 PYTHON=python3
 
-.PHONY: help clean tar format results unet
+.PHONY: help clean tar format training_results optuna_results unet
 
-help:	      ## Show this help message
+help:	               ## Show this help message
 	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)
 
-clean:	      ## Clean the directory
-	git clean -dxf -e local_data/ -e model-output/ -e .idea/ -e .vscode/ -e .python-version -e mlruns
+clean:	               ## Clean the directory
+	git clean -dxf -e local_data/ -e trained_models/ -e .idea/ -e .vscode/ -e .python-version -e mlruns
 
-tar:	      ## Tar the current project
+tar:	               ## Tar the current project
 	tar --exclude="./.git" --exclude="./__pycache" -czvf project.tar .
 
-format:	      ## Format python files in place with black formatter
+format:	               ## Format python files in place with black formatter
 	black -l 120 .
 
-results:      ## See Neural Net results via Tensorboard
+training_results:      ## See Neural Net results via Tensorboard
 	tensorboard --logdir runs
 
-unet:         ## Train UNet model
+optuna_results:        ## See Optuna results via MLflow
+	mlflow server
+
+unet:                  ## Train UNet model
 	./train_model.py -m unet
