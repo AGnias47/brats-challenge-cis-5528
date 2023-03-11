@@ -32,15 +32,9 @@ class OptunaUnet(OptunaNet):
 
 def objective(trial):
     model = OptunaUnet(trial)
-    (
-        train_dataloader,
-        test_dataloader,
-        validation_dataloader,
-    ) = train_test_val_dataloaders(
-        TRAIN_RATIO,
-        TEST_RATIO,
-        VAL_RATIO,
-        dataloader_kwargs,
+    image_key = trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
+    train, _, val = train_test_val_dataloaders(
+        TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, image_key, "seg"
     )
     validation_metric = DiceMetric(
         include_background=True, reduction="mean", get_not_nans=False
@@ -49,8 +43,8 @@ def objective(trial):
         [Activations(sigmoid=True), AsDiscrete(threshold=0.5)]
     )
     return model.run_training(
-        train_dataloader,
-        validation_dataloader,
+        train,
+        val,
         validation_postprocessor,
         validation_metric,
         args.epochs,

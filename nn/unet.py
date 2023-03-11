@@ -15,7 +15,7 @@ class UNet(NNet):
             strides=(2, 2, 2, 2),
             num_res_units=2,
         )
-        optimizer = optim.ASGD
-        alpha = 0.0008040631180475624
-        gamma = 7.328377594951827e-05
+        optimizer = optim.Adam
+        alpha = 1.8220013932088323e-06
+        gamma = 1.4745070375037202e-05
         super().__init__(model, optimizer, alpha, gamma)

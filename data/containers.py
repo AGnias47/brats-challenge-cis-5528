@@ -1,7 +1,7 @@
 from pathlib import Path
 from torch.utils.data import random_split
 from monai.data import PersistentDataset, Dataset, DataLoader
-from .transforms import transform_function
+from .transforms import dict_transform_function
 from config import LOCAL_DATA, PERSIST_DATASET
 
 
@@ -48,7 +48,7 @@ def dataset_dicts(data_type="train", dataset_path=None):
     return dataset
 
 
-def brats_dataset(data_type, dataset_path=None):
+def brats_dataset(data_type, image_key, label_key, dataset_path=None):
     """
     Returns a BraTS Dataset object
 
@@ -70,12 +70,19 @@ def brats_dataset(data_type, dataset_path=None):
         If dataset is set to persist, directory where persistent data is stored; appends dataloader_type to the
         end of the given path
 
+    References
+    ----------
+    * https://stackoverflow.com/questions/54637847/how-to-change-dictionary-keys-in-a-list-of-dictionaries
+
     Returns
     -------
     Dataset
     """
     dataset = dataset_dicts(data_type, dataset_path)
-    data_transform_function = transform_function()
+    for d in dataset:
+        d["image"] = d.pop(image_key)
+        d["label"] = d.pop(label_key)
+    data_transform_function = dict_transform_function()
     if PERSIST_DATASET:
         return PersistentDataset(
             data=dataset,
@@ -86,7 +93,9 @@ def brats_dataset(data_type, dataset_path=None):
         return Dataset(data=dataset, transform=data_transform_function)
 
 
-def train_test_val_dataloaders(train_ratio, test_ratio, val_ratio, dataloader_kwargs, dataset_path=None):
+def train_test_val_dataloaders(
+    train_ratio, test_ratio, val_ratio, dataloader_kwargs, image_key, label_key, dataset_path=None
+):
     """
     Creates a train, test, and validation DataLoader objects of the BraTS dataset. Combines the use of dataset
     generation and transform function composition in the process of creating the DataLoaders.
@@ -107,7 +116,7 @@ def train_test_val_dataloaders(train_ratio, test_ratio, val_ratio, dataloader_kw
     ratio_total = train_ratio + test_ratio + val_ratio
     if ratio_total < 0.99 or ratio_total > 1.01:
         raise ValueError("Invalid train-test-val ratios provided")
-    dataset = brats_dataset("train", dataset_path)
+    dataset = brats_dataset("train", image_key, label_key, dataset_path)
     train, test, val = random_split(dataset, [train_ratio, test_ratio, val_ratio])
     return (
         DataLoader(train, **dataloader_kwargs),
