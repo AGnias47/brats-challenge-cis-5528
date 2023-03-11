@@ -5,6 +5,7 @@ import argparse
 
 import monai
 from monai.metrics import DiceMetric
+from monai.networks.nets import UNet as MonaiUNet
 from monai.transforms import Compose, Activations, AsDiscrete
 import optuna
 from optuna.integration.mlflow import MLflowCallback
@@ -13,8 +14,6 @@ import torch
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
 from nn.optuna_net import OptunaNet
-
-from monai.networks.nets import UNet as MonaiUNet
 
 
 class OptunaUnet(OptunaNet):
@@ -79,7 +78,7 @@ if __name__ == "__main__":
     try:
         study.optimize(
             objective,
-            callbacks=[MLflowCallback(metric_name="loss")],
+            callbacks=[MLflowCallback(metric_name="validation_mean_dice")],
             n_trials=args.trials,
             show_progress_bar=True,
         )

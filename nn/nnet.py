@@ -89,7 +89,7 @@ class NNet:
                 output = torch.stack(
                     [postproc_func(i) for i in decollate_batch(output)]
                 )
-                binarized_y = (label > 0.5).float()
+                binarized_y = [postproc_func(i) for i in decollate_batch(label)]
                 val_metric(y_pred=output, y=binarized_y)
             metric = val_metric.aggregate().item()
             val_metric.reset()
@@ -97,6 +97,7 @@ class NNet:
                 print(f"Epoch {epoch} Mean Dice: {metric:.4f}")
                 print("-" * 25)
             if metric > best_metric:
+                best_metric = metric
                 self.best_model_weights = deepcopy(self.model.state_dict())
                 if summary_writer and epoch is not None:
                     plot_2d_or_3d_image(

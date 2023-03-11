@@ -5,6 +5,7 @@ venv/
 local_data/
 runs/
 model-output/
+mlruns/
 
 # IDEs
 .idea/
