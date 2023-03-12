@@ -2,8 +2,6 @@
 
 Repository for all code related to project.
 
-Colab notebook link: https://colab.research.google.com/drive/1NIt0CRtdomc9ldJAMed1hUboB1cREBgc#scrollTo=uZNdCRAnE7yI
-
 ## Local Setup
 
 ### Python Setup
