@@ -24,7 +24,7 @@ parser.add_argument(
     help="Neural Network type to use; one of [unet, resnet]",
     default="unet",
 )
-parser.add_argument("-e", "--epochs", help="Number of training epochs to use", type=int, default=25)
+parser.add_argument("-e", "--epochs", help="Number of training epochs to use", type=int, default=100)
 parser.add_argument(
     "-i",
     "--image_key",

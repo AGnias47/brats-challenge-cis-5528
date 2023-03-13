@@ -15,7 +15,7 @@ from data.transforms import validation_postprocessor
 
 
 class NNet:
-    def __init__(self, model, optimizer, alpha, gamma):
+    def __init__(self, model, optimizer, alpha, gamma=None):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
         self.lf = DiceCELoss(sigmoid=True)
@@ -25,7 +25,10 @@ class NNet:
             self.optim = optimizer(self.model.parameters(), alpha)
         except TypeError:
             self.optim = optimizer(self.model.parameters())
-        self.scheduler = ExponentialLR(self.optim, gamma)  # Not currently being used; was hurting performance in UNet
+        if gamma:
+            self.scheduler = ExponentialLR(self.optim, gamma)
+        else:
+            self.scheduler = None
         self.best_model_weights = None
 
     def run_training(
@@ -64,7 +67,8 @@ class NNet:
         total_loss = running_loss / len(dataloader)
         if summary_writer and epoch is not None:
             summary_writer.add_scalar("training_loss", total_loss, epoch)
-        # self.scheduler.step()
+        if self.scheduler:
+            self.scheduler.step()
         if epoch is not None:
             print(f"Epoch {epoch} Training Loss: {total_loss:.4f}")
             print("-" * 25)
@@ -89,6 +93,7 @@ class NNet:
                     overlap=0.25,
                 )
                 output = torch.stack([self.postproc_func(i) for i in decollate_batch(output)])
+                # binarized_y = [self.postproc_func(i) for i in decollate_batch(label)]
                 self.val_metric(y_pred=output, y=label)
             metric = self.val_metric.aggregate().item()
             self.val_metric.reset()
