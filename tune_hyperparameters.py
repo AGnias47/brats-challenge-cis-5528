@@ -44,8 +44,8 @@ def objective(trial):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--epochs", type=int, default=7)
-    parser.add_argument("-t", "--trials", type=int, default=150)
+    parser.add_argument("-e", "--epochs", type=int, default=50)
+    parser.add_argument("-t", "--trials", type=int, default=50)
     args = parser.parse_args()
     monai.utils.set_determinism(seed=42, additional_settings=None)
     if not torch.cuda.is_available():
