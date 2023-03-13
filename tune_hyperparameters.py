@@ -7,7 +7,7 @@ tune_hyperparameters.py - Uses Optuna to determine ideal model hyperparameters
 import argparse
 
 import monai
-from monai.networks.nets import UNet as MonaiUNet
+from monai.networks.nets import UNet, SegResNet
 import optuna
 from optuna.integration.mlflow import MLflowCallback
 import torch
@@ -20,7 +20,7 @@ from nn.optunet import Optunet
 class OptunaUnet(Optunet):
     def __init__(self, trial):
         self.name = "optuna_unet"
-        model = MonaiUNet(
+        model = UNet(
             spatial_dims=3,
             in_channels=1,
             out_channels=1,
@@ -30,8 +30,19 @@ class OptunaUnet(Optunet):
         )
         super().__init__(trial, model)
 
+class OptunaResNet(Optunet):
+    def __init__(self, trial):
+        self.name = "optuna_resnet"
+        model = SegResNet(
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=1,
+        )
+        super().__init__(trial, model)
 
-def objective(trial):
+
+
+def unet_objective(trial):
     model = OptunaUnet(trial)
     image_key = trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
     train, _, val = train_test_val_dataloaders(TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, image_key, "seg")
@@ -41,10 +52,22 @@ def objective(trial):
         args.epochs,
     )
 
+def resnet_objective(trial):
+    model = OptunaResNet(trial)
+    image_key = trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
+    train, _, val = train_test_val_dataloaders(TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, image_key, "seg")
+    return model.run_training(
+        train,
+        val,
+        args.epochs,
+    )
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--epochs", type=int, default=50)
+    parser.add_argument("-m", "--model", type=str)
+    parser.add_argument("-e", "--epochs", type=int, default=15)
     parser.add_argument("-t", "--trials", type=int, default=50)
     args = parser.parse_args()
     monai.utils.set_determinism(seed=42, additional_settings=None)
@@ -55,8 +78,17 @@ if __name__ == "__main__":
         print("Using GPU")
         dataloader_kwargs = DATALOADER_KWARGS_GPU
 
+    if "unet" in args.model.casefold():
+        objective = unet_objective
+        study_name="UNet Hyperparameter Optimization"
+    elif "resnet" in args.model.casefold():
+        objective = resnet_objective
+        study_name="SegResNet Hyperparameter Optimization"
+    else:
+        raise ValueError("Invalid model type specified")
+
     study = optuna.create_study(
-        study_name="UNet Hyperparameter Optimization",
+        study_name=study_name,
         direction="maximize",
         pruner=optuna.pruners.MedianPruner(),
     )
