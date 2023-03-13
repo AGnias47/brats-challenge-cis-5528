@@ -65,7 +65,7 @@ class NNet:
                 loss.backward()
                 self.optim.step()
             running_loss += loss.item()
-        total_loss = running_loss / (len(dataloader.dataset))
+        total_loss = running_loss / len(dataloader)
         if summary_writer and epoch is not None:
             summary_writer.add_scalar("training_loss", total_loss, epoch)
         # self.scheduler.step()
@@ -89,16 +89,15 @@ class NNet:
                 )
                 output = sliding_window_inference(
                     inputs=image,
-                    roi_size=IMAGE_RESOLUTION,
+                    roi_size=(96, 96, 96),  # IMAGE_RESOLUTION,
                     sw_batch_size=image.size()[0],
                     predictor=self.model,
-                    overlap=0.5,
+                    overlap=0.25,
                 )
                 output = torch.stack(
                     [self.postproc_func(i) for i in decollate_batch(output)]
                 )
-                binarized_y = [self.postproc_func(i) for i in decollate_batch(label)]
-                self.val_metric(y_pred=output, y=binarized_y)
+                self.val_metric(y_pred=output, y=label)
             metric = self.val_metric.aggregate().item()
             self.val_metric.reset()
             if epoch is not None:

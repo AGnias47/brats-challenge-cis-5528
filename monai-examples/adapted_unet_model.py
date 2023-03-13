@@ -39,7 +39,7 @@ def main(tempdir):
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
     train_loader, _, val_loader = train_test_val_dataloaders(
-        TRAIN_RATIO, TEST_RATIO, VAL_RATIO, DATALOADER_KWARGS_GPU
+        TRAIN_RATIO, TEST_RATIO, VAL_RATIO, DATALOADER_KWARGS_GPU, "flair", "seg"
     )
 
     dice_metric = DiceMetric(
@@ -74,7 +74,7 @@ def main(tempdir):
         step = 0
         for batch_data in train_loader:
             step += 1
-            inputs, labels = batch_data["flair"].to(device), batch_data["seg"].to(
+            inputs, labels = batch_data["image"].to(device), batch_data["label"].to(
                 device
             )
             optimizer.zero_grad()
@@ -95,8 +95,8 @@ def main(tempdir):
                 val_labels = None
                 val_outputs = None
                 for val_data in val_loader:
-                    val_images, val_labels = val_data["flair"].to(device), val_data[
-                        "seg"
+                    val_images, val_labels = val_data["image"].to(device), val_data[
+                        "label"
                     ].to(device)
                     roi_size = (96, 96, 96)
                     sw_batch_size = 4

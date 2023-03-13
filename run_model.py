@@ -31,7 +31,13 @@ if __name__ == "__main__":
         "-i",
         "--image_path",
         type=str,
-        default="local_data/validation/BraTS2021_00001/BraTS2021_00001_t1ce.nii.gz",
+        default="local_data/train/BraTS2021_00000/BraTS2021_00000_flair.nii.gz",
+    )
+    parser.add_argument(
+        "-l",
+        "--label_path",
+        type=str,
+        default="local_data/train/BraTS2021_00000/BraTS2021_00000_seg.nii.gz",
     )
     args = parser.parse_args()
     monai.utils.set_determinism(seed=42, additional_settings=None)
@@ -52,7 +58,7 @@ if __name__ == "__main__":
         model.eval()
         output = sliding_window_inference(image, (96, 96, 96), 1, model)
         processed_output = validation_postprocessor()(output[0]).to("cpu")
-    fig, ax = plt.subplots(SLICES_TO_SHOW - 1, 2, figsize=(5, 8))
+    fig, ax = plt.subplots(SLICES_TO_SHOW - 1, 3, figsize=(8, 8))
     for i, s in enumerate(range(SLICE_GAP, SLICES - 1, SLICE_GAP)):
         ax[i, 0].imshow(transformed_image[0, :, :, s], cmap="gray")
         if s == SLICE_GAP:
@@ -60,10 +66,19 @@ if __name__ == "__main__":
         ax[i, 0].set_xlabel(f"Slice {s}")
         ax[i, 0].set_xticks([])
         ax[i, 0].set_yticks([])
-        ax[i, 1].imshow(processed_output[0, :, :, s].detach().cpu())
+
+        label = single_image_transform_function()(args.label_path)
+        ax[i, 1].imshow(label[0, :, :, s].detach().cpu())
         if s == SLICE_GAP:
-            ax[i, 1].set_title("Segmentations\n")
+            ax[i, 1].set_title("Input Labels\n")
         ax[i, 1].set_xlabel(f"Slice {s}")
         ax[i, 1].set_xticks([])
         ax[i, 1].set_yticks([])
+
+        ax[i, 2].imshow(processed_output[0, :, :, s].detach().cpu())
+        if s == SLICE_GAP:
+            ax[i, 2].set_title("Model Segmentations\n")
+        ax[i, 2].set_xlabel(f"Slice {s}")
+        ax[i, 2].set_xticks([])
+        ax[i, 2].set_yticks([])
     plt.show()

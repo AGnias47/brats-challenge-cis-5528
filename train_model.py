@@ -25,7 +25,7 @@ parser.add_argument(
     default="unet",
 )
 parser.add_argument(
-    "-e", "--epochs", help="Number of training epochs to use", type=int, default=5
+    "-e", "--epochs", help="Number of training epochs to use", type=int, default=25
 )
 parser.add_argument(
     "-i",
