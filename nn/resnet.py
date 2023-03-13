@@ -8,6 +8,5 @@ class ResNet(NNet):
         self.name = "resnet"
         model = resnet50()
         optimizer = optim.Adam
-        alpha = 0.1
-        gamma = 4.182657295694138e-05
-        super().__init__(model, optimizer, alpha, gamma)
+        alpha = 1e-2
+        super().__init__(model, optimizer, alpha)

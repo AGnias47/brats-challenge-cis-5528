@@ -7,9 +7,8 @@ class Optunet(NNet):
     def __init__(self, trial, model):
         self.trial = trial
         optimizer = self.select_optimizer()
-        alpha = trial.suggest_float("lr", 5e-7, 5e-3, log=True)
-        gamma = trial.suggest_float("gamma", 1e-5, 1e-3, log=True)
-        super().__init__(model, optimizer, alpha, gamma)
+        alpha = trial.suggest_float("lr", 5e-4, 5e-1, log=True)
+        super().__init__(model, optimizer, alpha)
 
     def select_optimizer(self):
         optimizer_name = self.trial.suggest_categorical(
