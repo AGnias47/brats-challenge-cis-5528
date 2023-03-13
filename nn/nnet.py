@@ -90,10 +90,9 @@ class NNet:
                     roi_size=IMAGE_RESOLUTION,
                     sw_batch_size=image.size()[0],
                     predictor=self.model,
-                    overlap=0.25,
+                    overlap=0.5,
                 )
                 output = torch.stack([self.postproc_func(i) for i in decollate_batch(output)])
-                # binarized_y = [self.postproc_func(i) for i in decollate_batch(label)]
                 self.val_metric(y_pred=output, y=label)
             metric = self.val_metric.aggregate().item()
             self.val_metric.reset()
