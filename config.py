@@ -27,7 +27,7 @@ DATALOADER_KWARGS_GPU = {
 
 # Filepath parameters
 LOCAL_DATA = {
-    "train": "local_data/train",
+    "train": "local_data/train_subset",
     "validation": "local_data/validation",
     "cache": "local_data/persistent_dataset",
     "model_output": "trained_models",

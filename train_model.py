@@ -15,10 +15,14 @@ import torch
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
 from nn.unet import UNet
+from nn.resnet import ResNet
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-m", "--model", help="Neural Network type to use; one of [unet]", default="unet"
+    "-m",
+    "--model",
+    help="Neural Network type to use; one of [unet, resnet]",
+    default="unet",
 )
 parser.add_argument(
     "-e", "--epochs", help="Number of training epochs to use", type=int, default=5
@@ -48,6 +52,8 @@ else:
 
 if args.model.casefold() == "unet":
     nnet = UNet()
+elif args.model.casefold() == "resnet":
+    nnet = ResNet()
 else:
     raise ValueError("Invalid model type specified")
 

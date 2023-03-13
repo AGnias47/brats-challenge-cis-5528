@@ -10,6 +10,7 @@ import torch.optim
 from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import tqdm
 
+from config import IMAGE_RESOLUTION
 from data.transforms import validation_postprocessor
 
 
@@ -67,7 +68,7 @@ class NNet:
         total_loss = running_loss / (len(dataloader.dataset))
         if summary_writer and epoch is not None:
             summary_writer.add_scalar("training_loss", total_loss, epoch)
-        self.scheduler.step()
+        # self.scheduler.step()
         if epoch is not None:
             print(f"Epoch {epoch} Training Loss: {total_loss:.4f}")
             print("-" * 25)
@@ -85,10 +86,13 @@ class NNet:
             for batch in dataloader:
                 image, label = batch["image"].to(self.device), batch["label"].to(
                     self.device
-                )  # torch.Size([3, 1, 128, 128, 64])
-                roi_size = (96, 96, 96)
+                )
                 output = sliding_window_inference(
-                    image, roi_size, image.size()[0], self.model
+                    inputs=image,
+                    roi_size=IMAGE_RESOLUTION,
+                    sw_batch_size=image.size()[0],
+                    predictor=self.model,
+                    overlap=0.5,
                 )
                 output = torch.stack(
                     [self.postproc_func(i) for i in decollate_batch(output)]
