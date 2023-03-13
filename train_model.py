@@ -21,14 +21,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "-m",
     "--model",
-    help="Neural Network type to use; one of [unet, resnet]",
+    help="Neural Network type to use; one of [unet, resnet] (default is unet)",
     default="unet",
 )
-parser.add_argument("-e", "--epochs", help="Number of training epochs to use", type=int, default=100)
+parser.add_argument("-e", "--epochs", help="Number of training epochs to use (default is 100)", type=int, default=100)
 parser.add_argument(
     "-i",
     "--image_key",
-    help="Image key corresponding to type; one of [flair, t1ce, t1, t2]",
+    help="Image key corresponding to type; one of [flair, t1ce, t1, t2] (default is flair)",
     default="flair",
 )
 parser.add_argument(

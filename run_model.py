@@ -13,6 +13,7 @@ import argparse
 import matplotlib.pyplot as plt
 import monai
 from monai.inferers import sliding_window_inference
+from monai.networks.nets import SegResNet
 from monai.networks.nets import UNet as MonaiUNet
 import torch
 
@@ -24,7 +25,9 @@ SLICE_GAP = SLICES // SLICES_TO_SHOW
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--model_path", type=str, default="trained_models/unet-model.pth")
+    parser.add_argument(
+        "-m", "--model_path", type=str, default="trained_models/unet-model.pth"
+    )
     parser.add_argument(
         "-i",
         "--image_path",
@@ -40,14 +43,23 @@ if __name__ == "__main__":
     args = parser.parse_args()
     monai.utils.set_determinism(seed=42, additional_settings=None)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = MonaiUNet(
-        spatial_dims=3,
-        in_channels=1,
-        out_channels=1,
-        channels=(16, 32, 64, 128, 256),
-        strides=(2, 2, 2, 2),
-        num_res_units=2,
-    )
+    if "unet" in args.model_path.casefold():
+        model = MonaiUNet(
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=1,
+            channels=(16, 32, 64, 128, 256),
+            strides=(2, 2, 2, 2),
+            num_res_units=2,
+        )
+    elif "resnet" in args.model_path.casefold():
+        model = SegResNet(
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=1,
+        )
+    else:
+        raise ValueError("Invalid model type specified")
     model.load_state_dict(torch.load(args.model_path))
     model.to(device)
     transformed_image = single_image_transform_function()(args.image_path)
