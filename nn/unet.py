@@ -17,5 +17,5 @@ class UNet(NNet):
         )
         optimizer = optim.Adam
         alpha = 1e-2
-        gamma = 4.182657295694138e-05
+        gamma = 0.1
         super().__init__(model, optimizer, alpha, gamma)

@@ -42,9 +42,7 @@ def main(tempdir):
         TRAIN_RATIO, TEST_RATIO, VAL_RATIO, DATALOADER_KWARGS_GPU, "flair", "seg"
     )
 
-    dice_metric = DiceMetric(
-        include_background=True, reduction="mean", get_not_nans=False
-    )
+    dice_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
     post_trans = Compose([Activations(sigmoid=True), AsDiscrete(threshold=0.5)])
     # create UNet, DiceLoss and Adam optimizer
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -74,9 +72,7 @@ def main(tempdir):
         step = 0
         for batch_data in train_loader:
             step += 1
-            inputs, labels = batch_data["image"].to(device), batch_data["label"].to(
-                device
-            )
+            inputs, labels = batch_data["image"].to(device), batch_data["label"].to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = loss_function(outputs, labels)
@@ -95,14 +91,10 @@ def main(tempdir):
                 val_labels = None
                 val_outputs = None
                 for val_data in val_loader:
-                    val_images, val_labels = val_data["image"].to(device), val_data[
-                        "label"
-                    ].to(device)
+                    val_images, val_labels = val_data["image"].to(device), val_data["label"].to(device)
                     roi_size = (96, 96, 96)
                     sw_batch_size = 4
-                    val_outputs = sliding_window_inference(
-                        val_images, roi_size, sw_batch_size, model
-                    )
+                    val_outputs = sliding_window_inference(val_images, roi_size, sw_batch_size, model)
                     val_outputs = [post_trans(i) for i in decollate_batch(val_outputs)]
                     # compute metric for current iteration
                     dice_metric(y_pred=val_outputs, y=val_labels)
@@ -115,9 +107,7 @@ def main(tempdir):
                 if metric > best_metric:
                     best_metric = metric
                     best_metric_epoch = epoch + 1
-                    torch.save(
-                        model.state_dict(), "best_metric_model_segmentation3d_dict.pth"
-                    )
+                    torch.save(model.state_dict(), "best_metric_model_segmentation3d_dict.pth")
                     print("saved new best metric model")
                 print(
                     "current epoch: {} current mean dice: {:.4f} best mean dice: {:.4f} at epoch {}".format(
@@ -128,13 +118,9 @@ def main(tempdir):
                 # plot the last model output as GIF image in TensorBoard with the corresponding image and label
                 plot_2d_or_3d_image(val_images, epoch + 1, writer, index=0, tag="image")
                 plot_2d_or_3d_image(val_labels, epoch + 1, writer, index=0, tag="label")
-                plot_2d_or_3d_image(
-                    val_outputs, epoch + 1, writer, index=0, tag="output"
-                )
+                plot_2d_or_3d_image(val_outputs, epoch + 1, writer, index=0, tag="output")
 
-    print(
-        f"train completed, best_metric: {best_metric:.4f} at epoch: {best_metric_epoch}"
-    )
+    print(f"train completed, best_metric: {best_metric:.4f} at epoch: {best_metric_epoch}")
     writer.close()
 
 

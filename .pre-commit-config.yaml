@@ -1,10 +1,6 @@
 minimum_pre_commit_version: 2.11.0
 default_stages: [commit, push, manual]
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.1.0
-    hooks:
-      - id: black
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:

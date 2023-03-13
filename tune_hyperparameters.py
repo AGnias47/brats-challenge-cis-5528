@@ -34,9 +34,7 @@ class OptunaUnet(Optunet):
 def objective(trial):
     model = OptunaUnet(trial)
     image_key = trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
-    train, _, val = train_test_val_dataloaders(
-        TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, image_key, "seg"
-    )
+    train, _, val = train_test_val_dataloaders(TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, image_key, "seg")
     return model.run_training(
         train,
         val,

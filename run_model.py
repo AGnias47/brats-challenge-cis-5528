@@ -24,9 +24,7 @@ SLICE_GAP = SLICES // SLICES_TO_SHOW
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-m", "--model_path", type=str, default="trained_models/unet-model.pth"
-    )
+    parser.add_argument("-m", "--model_path", type=str, default="trained_models/unet-model.pth")
     parser.add_argument(
         "-i",
         "--image_path",
