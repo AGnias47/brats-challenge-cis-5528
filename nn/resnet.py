@@ -11,6 +11,6 @@ class ResNet(NNet):
             in_channels=1,
             out_channels=1,
         )
-        optimizer = optim.Adam
-        alpha = 1e-2
+        optimizer = optim.Adamax
+        alpha = 0.35
         super().__init__(model, optimizer, alpha)
