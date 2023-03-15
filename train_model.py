@@ -24,7 +24,13 @@ parser.add_argument(
     help="Neural Network type to use; one of [unet, resnet] (default is unet)",
     default="unet",
 )
-parser.add_argument("-e", "--epochs", help="Number of training epochs to use (default is 10)", type=int, default=10)
+parser.add_argument(
+    "-e",
+    "--epochs",
+    help="Number of training epochs to use (default is 10)",
+    type=int,
+    default=10,
+)
 parser.add_argument(
     "-i",
     "--image_key",
@@ -74,5 +80,3 @@ else:
         validation_dataloader,
         args.epochs,
     )
-
-nnet.save_model(f"{LOCAL_DATA['model_output']}/{nnet.name}-model.pth")
