@@ -29,7 +29,7 @@ parser.add_argument(
     "--epochs",
     help="Number of training epochs to use (default is 10)",
     type=int,
-    default=5,
+    default=50,
 )
 parser.add_argument(
     "-i",
