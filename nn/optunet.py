@@ -4,11 +4,11 @@ from .nnet import NNet
 
 
 class Optunet(NNet):
-    def __init__(self, trial, model):
+    def __init__(self, name, trial, model):
         self.trial = trial
         optimizer = self.select_optimizer()
         alpha = trial.suggest_float("lr", 5e-4, 5e-1, log=True)
-        super().__init__("optunet", model, optimizer, alpha)
+        super().__init__(name, model, optimizer, alpha)
 
     def select_optimizer(self):
         optimizer_name = self.trial.suggest_categorical(

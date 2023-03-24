@@ -19,7 +19,7 @@ from nn.optunet import Optunet
 
 class OptunaUnet(Optunet):
     def __init__(self, trial):
-        self.name = "optuna_unet"
+        name = "optuna_unet"
         model = UNet(
             spatial_dims=3,
             in_channels=1,
@@ -28,23 +28,23 @@ class OptunaUnet(Optunet):
             strides=(2, 2, 2, 2),
             num_res_units=2,
         )
-        super().__init__(trial, model)
+        super().__init__(name, trial, model)
 
 class OptunaResNet(Optunet):
     def __init__(self, trial):
-        self.name = "optuna_resnet"
+        name = "optuna_resnet"
         model = SegResNet(
             spatial_dims=3,
             in_channels=1,
             out_channels=1,
         )
-        super().__init__(trial, model)
+        super().__init__(name, trial, model)
 
 
 
 def unet_objective(trial):
     model = OptunaUnet(trial)
-    image_key = trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
+    image_key = "flair"  # trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
     train, _, val = train_test_val_dataloaders(TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, image_key, "seg")
     return model.run_training(
         train,
@@ -54,7 +54,7 @@ def unet_objective(trial):
 
 def resnet_objective(trial):
     model = OptunaResNet(trial)
-    image_key = trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
+    image_key = "flair"  # trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
     train, _, val = train_test_val_dataloaders(TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, image_key, "seg")
     return model.run_training(
         train,
@@ -67,8 +67,8 @@ def resnet_objective(trial):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", type=str)
-    parser.add_argument("-e", "--epochs", type=int, default=15)
-    parser.add_argument("-t", "--trials", type=int, default=50)
+    parser.add_argument("-e", "--epochs", type=int, default=50)
+    parser.add_argument("-t", "--trials", type=int, default=20)
     args = parser.parse_args()
     monai.utils.set_determinism(seed=42, additional_settings=None)
     if not torch.cuda.is_available():

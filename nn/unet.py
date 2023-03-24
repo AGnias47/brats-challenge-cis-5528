@@ -15,5 +15,5 @@ class UNet(NNet):
             num_res_units=2,
         )
         optimizer = optim.Adam
-        alpha = 1e-2
+        alpha = 0.015
         super().__init__("unet", model, optimizer, alpha)
