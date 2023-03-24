@@ -29,7 +29,7 @@ parser.add_argument(
     "--epochs",
     help="Number of training epochs to use (default is 10)",
     type=int,
-    default=10,
+    default=5,
 )
 parser.add_argument(
     "-i",
@@ -74,9 +74,13 @@ if args.use_summary_writer:
             args.epochs,
             summary_writer,
         )
+        f1 = nnet.test(test_dataloader, summary_writer)
 else:
     nnet.run_training(
         train_dataloader,
         validation_dataloader,
         args.epochs,
     )
+    f1 = nnet.test(test_dataloader)
+print(f"F1 score: {f1}")
+

@@ -15,8 +15,9 @@ from data.transforms import validation_postprocessor
 
 
 class NNet:
-    def __init__(self, model, optimizer, alpha, gamma=None):
+    def __init__(self, name, model, optimizer, alpha, gamma=None):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.name = name
         self.model = model.to(self.device)
         self.lf = DiceCELoss(sigmoid=True)
         self.postproc_func = validation_postprocessor()
@@ -31,7 +32,6 @@ class NNet:
             self.scheduler = ExponentialLR(self.optim, gamma)
         else:
             self.scheduler = None
-        self.best_model_weights = None
 
     def run_training(
         self,
@@ -51,8 +51,11 @@ class NNet:
             )
         return best_metric
 
-    def save_model(self, filepath):
-        torch.save(self.best_model_weights, filepath)
+    def save_model(self):
+        best_model_weights = deepcopy(self.model.state_dict())
+        torch.save(
+            best_model_weights, f"{LOCAL_DATA['model_output']}/{self.name}-model.pth"
+        )
 
     def _train(self, dataloader, epoch=None, summary_writer=None):
         self.model.train()
@@ -85,12 +88,46 @@ class NNet:
         summary_writer=None,
     ):
         self.model.eval()
+        with torch.no_grad():
+            for batch in dataloader:
+                image, label = batch["image"].to(self.device), batch["label"].to(
+                    self.device
+                )
+                self.optim.zero_grad()
+                output = sliding_window_inference(
+                    inputs=image,
+                    roi_size=IMAGE_RESOLUTION,
+                    sw_batch_size=image.size()[0],
+                    predictor=self.model,
+                    overlap=0.5,
+                )
+                output = torch.stack([self.postproc_func(i) for i in decollate_batch(output)])
+                self.val_metric(y_pred=output, y=label)
+            metric = self.val_metric.aggregate().item()
+            self.val_metric.reset()
+            if epoch is not None:
+                print(f"Epoch {epoch} Mean Dice: {metric:.4f}")
+                print("-" * 25)
+            if metric > best_metric:
+                best_metric = metric
+                self.save_model()
+            if summary_writer:
+                summary_writer.add_scalar("validation_mean_dice", metric, epoch)
+        return best_metric
+
+    def test(
+        self,
+        dataloader,
+        summary_writer=None,
+    ):
+        self.model.eval()
         image, label, output = None, None, None
         with torch.no_grad():
             for batch in dataloader:
                 image, label = batch["image"].to(self.device), batch["label"].to(
                     self.device
                 )
+                self.optim.zero_grad()
                 output = sliding_window_inference(
                     inputs=image,
                     roi_size=IMAGE_RESOLUTION,
@@ -104,26 +141,14 @@ class NNet:
                 self.val_metric(y_pred=output, y=label)
             metric = self.val_metric.aggregate().item()
             self.val_metric.reset()
-            if epoch is not None:
-                print(f"Epoch {epoch} Mean Dice: {metric:.4f}")
-                print("-" * 25)
-            if metric > best_metric:
-                self.model.save_model(
-                    f"{LOCAL_DATA['model_output']}/{self.model.name}-model.pth"
-                )
-                best_metric = metric
-                self.best_model_weights = deepcopy(self.model.state_dict())
-                if summary_writer and epoch is not None:
-                    plot_2d_or_3d_image(
-                        image, epoch + 1, summary_writer, index=0, tag="image"
-                    )
-                    plot_2d_or_3d_image(
-                        output, epoch + 1, summary_writer, index=0, tag="label"
-                    )
-                    plot_2d_or_3d_image(
-                        label, epoch + 1, summary_writer, index=0, tag="true_label"
-                    )
-
             if summary_writer:
-                summary_writer.add_scalar("validation_mean_dice", metric, epoch)
-        return best_metric
+                plot_2d_or_3d_image(
+                    image, 1, summary_writer, index=0, tag="image"
+                )
+                plot_2d_or_3d_image(
+                    output, 1, summary_writer, index=0, tag="label"
+                )
+                plot_2d_or_3d_image(
+                    label, 1, summary_writer, index=0, tag="true_label"
+                )
+        return metric

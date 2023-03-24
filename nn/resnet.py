@@ -5,7 +5,6 @@ from .nnet import NNet
 
 class ResNet(NNet):
     def __init__(self):
-        self.name = "resnet"
         model = SegResNet(
             spatial_dims=3,
             in_channels=1,
@@ -13,4 +12,4 @@ class ResNet(NNet):
         )
         optimizer = optim.Adamax
         alpha = 0.35
-        super().__init__(model, optimizer, alpha)
+        super().__init__("resnet", model, optimizer, alpha)

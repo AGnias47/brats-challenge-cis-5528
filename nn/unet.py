@@ -6,7 +6,6 @@ from .nnet import NNet
 
 class UNet(NNet):
     def __init__(self):
-        self.name = "unet"
         model = MonaiUNet(
             spatial_dims=3,
             in_channels=1,
@@ -17,4 +16,4 @@ class UNet(NNet):
         )
         optimizer = optim.Adam
         alpha = 1e-2
-        super().__init__(model, optimizer, alpha)
+        super().__init__("unet", model, optimizer, alpha)

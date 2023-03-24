@@ -1,5 +1,23 @@
 import monai.transforms as mt
+from monai.transforms import MapTransform
 from config import IMAGE_RESOLUTION
+
+
+class MultiToBinary(MapTransform):
+    """
+    Converts a multiclass segmentation into a binary class segmentation by setting any class value other than 0 to 1
+
+    Resources
+    ---------
+    * https://stackoverflow.com/a/60095396/8728749
+    * https://stackoverflow.com/questions/58002836/pytorch-1-if-x-0-5-else-0-for-x-in-outputs-with-tensors
+    """
+    def __call__(self, data):
+        d = dict(data)
+        for key in self.keys:
+            result = (d[key] > 1).float()
+            d[key] = result
+        return d
 
 
 def dict_transform_function():
@@ -13,7 +31,10 @@ def dict_transform_function():
     return mt.Compose(
         [
             mt.LoadImageD(keys=("image", "label")),  # Load NIFTI data
-            mt.EnsureChannelFirstD(keys=("image", "label")),  # Make image and label channel-first
+            MultiToBinary(keys="label"),
+            mt.EnsureChannelFirstD(
+                keys=("image", "label")
+            ),  # Make image and label channel-first
             mt.ScaleIntensityD(keys="image"),  # Scale image intensity
             mt.ResizeD(
                 ("image", "label"),
