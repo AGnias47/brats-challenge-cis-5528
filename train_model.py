@@ -11,11 +11,14 @@ import argparse
 
 import monai
 import torch
+from torch.utils.tensorboard import SummaryWriter
 
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
 from nn.unet import UNet
 from nn.resnet import ResNet
+
+DEFAULT_EPOCHS = 50
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -27,22 +30,15 @@ parser.add_argument(
 parser.add_argument(
     "-e",
     "--epochs",
-    help="Number of training epochs to use (default is 10)",
+    help=f"Number of training epochs to use (default is {DEFAULT_EPOCHS})",
     type=int,
-    default=50,
+    default=DEFAULT_EPOCHS,
 )
 parser.add_argument(
     "-i",
     "--image_key",
     help="Image key corresponding to type; one of [flair, t1ce, t1, t2] (default is flair)",
     default="flair",
-)
-parser.add_argument(
-    "-s",
-    "--use-summary-writer",
-    help="Flag to log data to Tensorboard (default is True)",
-    type=bool,
-    default=True,
 )
 args = parser.parse_args()
 
@@ -64,23 +60,15 @@ else:
 train_dataloader, test_dataloader, validation_dataloader = train_test_val_dataloaders(
     TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, args.image_key, "seg"
 )
-if args.use_summary_writer:
-    from torch.utils.tensorboard import SummaryWriter
 
-    with SummaryWriter(LOCAL_DATA["tensorboard_logs"]) as summary_writer:
-        nnet.run_training(
-            train_dataloader,
-            validation_dataloader,
-            args.epochs,
-            summary_writer,
-        )
-        f1 = nnet.test(test_dataloader, summary_writer)
-else:
+with SummaryWriter(LOCAL_DATA["tensorboard_logs"]) as summary_writer:
     nnet.run_training(
         train_dataloader,
         validation_dataloader,
         args.epochs,
+        summary_writer,
     )
-    f1 = nnet.test(test_dataloader)
+
+f1 = nnet.test(test_dataloader, summary_writer)
 print(f"F1 score: {f1}")
 

@@ -21,9 +21,7 @@ class NNet:
         self.model = model.to(self.device)
         self.lf = DiceCELoss(sigmoid=True)
         self.postproc_func = validation_postprocessor()
-        self.val_metric = DiceMetric(
-            include_background=True, reduction="mean", get_not_nans=False
-        )
+        self.val_metric = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
         try:
             self.optim = optimizer(self.model.parameters(), alpha)
         except TypeError:
@@ -53,22 +51,16 @@ class NNet:
 
     def save_model(self):
         best_model_weights = deepcopy(self.model.state_dict())
-        torch.save(
-            best_model_weights, f"{LOCAL_DATA['model_output']}/{self.name}-model.pth"
-        )
+        torch.save(best_model_weights, f"{LOCAL_DATA['model_output']}/{self.name}-model.pth")
 
     def load_model(self):
-        self.model.load_state_dict(
-            torch.load(f"{LOCAL_DATA['model_output']}/{self.name}-model.pth")
-        )
+        self.model.load_state_dict(torch.load(f"{LOCAL_DATA['model_output']}/{self.name}-model.pth"))
 
     def _train(self, dataloader, epoch=None, summary_writer=None):
         self.model.train()
         running_loss = 0
         for batch in dataloader:
-            image, label = batch["image"].to(self.device), batch["label"].to(
-                self.device
-            )
+            image, label = batch["image"].to(self.device), batch["label"].to(self.device)
             self.optim.zero_grad()
             with torch.set_grad_enabled(True):
                 outputs = self.model(image)
@@ -92,13 +84,10 @@ class NNet:
         epoch=None,
         summary_writer=None,
     ):
-
         self.model.eval()
         with torch.no_grad():
             for batch in dataloader:
-                image, label = batch["image"].to(self.device), batch["label"].to(
-                    self.device
-                )
+                image, label = batch["image"].to(self.device), batch["label"].to(self.device)
                 self.optim.zero_grad()
                 output = sliding_window_inference(
                     inputs=image,
@@ -107,9 +96,7 @@ class NNet:
                     predictor=self.model,
                     overlap=0.5,
                 )
-                output = torch.stack(
-                    [self.postproc_func(i) for i in decollate_batch(output)]
-                )
+                output = torch.stack([self.postproc_func(i) for i in decollate_batch(output)])
                 self.val_metric(y_pred=output, y=label)
             metric = self.val_metric.aggregate().item()
             self.val_metric.reset()
@@ -128,15 +115,12 @@ class NNet:
         dataloader,
         summary_writer=None,
     ):
-
         self.load_model()
         self.model.eval()
         image, label, output = None, None, None
         with torch.no_grad():
             for batch in dataloader:
-                image, label = batch["image"].to(self.device), batch["label"].to(
-                    self.device
-                )
+                image, label = batch["image"].to(self.device), batch["label"].to(self.device)
                 self.optim.zero_grad()
                 output = sliding_window_inference(
                     inputs=image,
@@ -145,9 +129,7 @@ class NNet:
                     predictor=self.model,
                     overlap=0.5,
                 )
-                output = torch.stack(
-                    [self.postproc_func(i) for i in decollate_batch(output)]
-                )
+                output = torch.stack([self.postproc_func(i) for i in decollate_batch(output)])
                 self.val_metric(y_pred=output, y=label)
             metric = self.val_metric.aggregate().item()
             self.val_metric.reset()

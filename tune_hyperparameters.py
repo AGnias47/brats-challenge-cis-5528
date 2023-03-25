@@ -30,6 +30,7 @@ class OptunaUnet(Optunet):
         )
         super().__init__(name, trial, model)
 
+
 class OptunaResNet(Optunet):
     def __init__(self, trial):
         name = "optuna_resnet"
@@ -39,7 +40,6 @@ class OptunaResNet(Optunet):
             out_channels=1,
         )
         super().__init__(name, trial, model)
-
 
 
 def unet_objective(trial):
@@ -52,6 +52,7 @@ def unet_objective(trial):
         args.epochs,
     )
 
+
 def resnet_objective(trial):
     model = OptunaResNet(trial)
     image_key = "flair"  # trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
@@ -61,7 +62,6 @@ def resnet_objective(trial):
         val,
         args.epochs,
     )
-
 
 
 if __name__ == "__main__":
@@ -80,10 +80,10 @@ if __name__ == "__main__":
 
     if "unet" in args.model.casefold():
         objective = unet_objective
-        study_name="UNet Hyperparameter Optimization"
+        study_name = "UNet Hyperparameter Optimization"
     elif "resnet" in args.model.casefold():
         objective = resnet_objective
-        study_name="SegResNet Hyperparameter Optimization"
+        study_name = "SegResNet Hyperparameter Optimization"
     else:
         raise ValueError("Invalid model type specified")
 

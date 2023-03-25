@@ -12,6 +12,7 @@ class MultiToBinary(MapTransform):
     * https://stackoverflow.com/a/60095396/8728749
     * https://stackoverflow.com/questions/58002836/pytorch-1-if-x-0-5-else-0-for-x-in-outputs-with-tensors
     """
+
     def __call__(self, data):
         d = dict(data)
         for key in self.keys:
@@ -32,9 +33,7 @@ def dict_transform_function():
         [
             mt.LoadImageD(keys=("image", "label")),  # Load NIFTI data
             MultiToBinary(keys="label"),
-            mt.EnsureChannelFirstD(
-                keys=("image", "label")
-            ),  # Make image and label channel-first
+            mt.EnsureChannelFirstD(keys=("image", "label")),  # Make image and label channel-first
             mt.ScaleIntensityD(keys="image"),  # Scale image intensity
             mt.ResizeD(
                 ("image", "label"),
