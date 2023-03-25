@@ -57,6 +57,11 @@ class NNet:
             best_model_weights, f"{LOCAL_DATA['model_output']}/{self.name}-model.pth"
         )
 
+    def load_model(self):
+        self.model.load_state_dict(
+            torch.load(f"{LOCAL_DATA['model_output']}/{self.name}-model.pth")
+        )
+
     def _train(self, dataloader, epoch=None, summary_writer=None):
         self.model.train()
         running_loss = 0
@@ -87,6 +92,7 @@ class NNet:
         epoch=None,
         summary_writer=None,
     ):
+
         self.model.eval()
         with torch.no_grad():
             for batch in dataloader:
@@ -101,7 +107,9 @@ class NNet:
                     predictor=self.model,
                     overlap=0.5,
                 )
-                output = torch.stack([self.postproc_func(i) for i in decollate_batch(output)])
+                output = torch.stack(
+                    [self.postproc_func(i) for i in decollate_batch(output)]
+                )
                 self.val_metric(y_pred=output, y=label)
             metric = self.val_metric.aggregate().item()
             self.val_metric.reset()
@@ -120,6 +128,8 @@ class NNet:
         dataloader,
         summary_writer=None,
     ):
+
+        self.load_model()
         self.model.eval()
         image, label, output = None, None, None
         with torch.no_grad():
@@ -142,13 +152,7 @@ class NNet:
             metric = self.val_metric.aggregate().item()
             self.val_metric.reset()
             if summary_writer:
-                plot_2d_or_3d_image(
-                    image, 1, summary_writer, index=0, tag="image"
-                )
-                plot_2d_or_3d_image(
-                    output, 1, summary_writer, index=0, tag="label"
-                )
-                plot_2d_or_3d_image(
-                    label, 1, summary_writer, index=0, tag="true_label"
-                )
+                plot_2d_or_3d_image(image, 1, summary_writer, index=0, tag="image")
+                plot_2d_or_3d_image(output, 1, summary_writer, index=0, tag="label")
+                plot_2d_or_3d_image(label, 1, summary_writer, index=0, tag="true_label")
         return metric
