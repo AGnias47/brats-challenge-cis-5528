@@ -15,8 +15,10 @@ Repository for all code related to project.
 ### Download Data
 
 * Download zip of training data from https://drive.google.com/file/d/1TQpeHXTB4YuwNJL0A5oCtVXZ3CnPa4SR/view?usp=share_link
+    * If not affiliated with this specific team, request access to competition data from Synapse [here](https://www.synapse.org/#!Synapse:syn27046444/wiki/616992) and download training data zip directly from their site.
 * Move the file to `./local_data`
 * Unzip `unzip RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021.zip`
+    * Exact filename will differ between competition years
 * Rename top level folder to `train`
 
 ## Train Model
