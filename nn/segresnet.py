@@ -1,15 +1,15 @@
 from torch import optim
-from monai.networks.nets import SegResNet
+from monai.networks.nets import SegResNet as MonaiSegResNet
 from .nnet import NNet
 
 
-class ResNet(NNet):
+class SegResNet(NNet):
     def __init__(self):
-        model = SegResNet(
+        model = MonaiSegResNet(
             spatial_dims=3,
             in_channels=1,
             out_channels=1,
         )
         optimizer = optim.Adam
         alpha = 0.0065
-        super().__init__("resnet", model, optimizer, alpha)
+        super().__init__("segresnet", model, optimizer, alpha)

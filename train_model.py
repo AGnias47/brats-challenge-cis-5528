@@ -16,7 +16,7 @@ from torch.utils.tensorboard import SummaryWriter
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
 from nn.unet import UNet
-from nn.resnet import ResNet
+from nn.segresnet import SegResNet
 
 DEFAULT_EPOCHS = 50
 
@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "-m",
     "--model",
-    help="Neural Network type to use; one of [unet, resnet] (default is unet)",
+    help="Neural Network type to use; one of [unet, segresnet] (default is unet)",
     default="unet",
 )
 parser.add_argument(
@@ -52,8 +52,8 @@ else:
 
 if args.model.casefold() == "unet":
     nnet = UNet()
-elif args.model.casefold() == "resnet":
-    nnet = ResNet()
+elif args.model.casefold() == "segresnet":
+    nnet = SegResNet()
 else:
     raise ValueError("Invalid model type specified")
 
@@ -71,4 +71,3 @@ with SummaryWriter(LOCAL_DATA["tensorboard_logs"]) as summary_writer:
 
 f1 = nnet.test(test_dataloader, summary_writer)
 print(f"F1 score: {f1}")
-
