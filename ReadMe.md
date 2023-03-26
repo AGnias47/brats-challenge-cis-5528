@@ -16,7 +16,7 @@ Repository for all code related to project.
 
 * Download zip of training data from https://drive.google.com/file/d/1TQpeHXTB4YuwNJL0A5oCtVXZ3CnPa4SR/view?usp=share_link
 * Move the file to `./local_data`
-* Unzip `unzip RSNA_ASNR_MICCAI_BraTS2021_ValidationData.zip`
+* Unzip `unzip RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021.zip`
 * Rename top level folder to `train`
 
 ## Train Model
