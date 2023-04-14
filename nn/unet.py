@@ -8,7 +8,7 @@ class UNet(NNet):
     def __init__(self):
         model = MonaiUNet(
             spatial_dims=3,
-            in_channels=1,
+            in_channels=4,
             out_channels=1,
             channels=(16, 32, 64, 128, 256),
             strides=(2, 2, 2, 2),

@@ -34,12 +34,6 @@ parser.add_argument(
     type=int,
     default=DEFAULT_EPOCHS,
 )
-parser.add_argument(
-    "-i",
-    "--image_key",
-    help="Image key corresponding to type; one of [flair, t1ce, t1, t2] (default is flair)",
-    default="flair",
-)
 args = parser.parse_args()
 
 monai.utils.set_determinism(seed=42, additional_settings=None)
@@ -58,7 +52,7 @@ else:
     raise ValueError("Invalid model type specified")
 
 train_dataloader, test_dataloader, validation_dataloader = train_test_val_dataloaders(
-    TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, args.image_key, "seg"
+    TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs
 )
 
 with SummaryWriter(LOCAL_DATA["tensorboard_logs"]) as summary_writer:

@@ -31,12 +31,14 @@ def dict_transform_function():
     """
     return mt.Compose(
         [
-            mt.LoadImageD(keys=("image", "label")),  # Load NIFTI data
-            MultiToBinary(keys="label"),
-            mt.EnsureChannelFirstD(keys=("image", "label")),  # Make image and label channel-first
+            mt.LoadImageD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Load NIFTI data
+            # mt.AddChannelD(keys=("t1", "t1ce", "t2", "flair")),
+            MultiToBinary(keys="seg"),
+            mt.ConcatItemsD(keys=("t1", "t1ce", "t2", "flair"), name="image"),
+            mt.EnsureChannelFirstD(keys=("image", "seg")),  # Make image and label channel-first
             mt.ScaleIntensityD(keys="image"),  # Scale image intensity
             mt.ResizeD(
-                ("image", "label"),
+                ("image", "seg"),
                 IMAGE_RESOLUTION,
                 mode=("trilinear", "nearest-exact"),
             ),  # Resize images
