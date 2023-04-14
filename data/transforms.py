@@ -1,7 +1,7 @@
 import monai.transforms as mt
 from monai.transforms import MapTransform
 from config import IMAGE_RESOLUTION
-
+import torch
 
 class MultiToBinary(MapTransform):
     """
@@ -20,6 +20,30 @@ class MultiToBinary(MapTransform):
             d[key] = result
         return d
 
+class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
+    """
+    Convert labels to multi channels based on brats classes:
+    label 1 is the peritumoral edema
+    label 2 is the GD-enhancing tumor
+    label 3 is the necrotic and non-enhancing tumor core
+    The possible classes are TC (Tumor core), WT (Whole tumor)
+    and ET (Enhancing tumor).
+
+    """
+
+    def __call__(self, data):
+        d = dict(data)
+        for key in self.keys:
+            result = []
+            # merge label 2 and label 3 to construct TC
+            result.append(torch.logical_or(d[key] == 2, d[key] == 3))
+            # merge labels 1, 2 and 3 to construct WT
+            result.append(torch.logical_or(torch.logical_or(d[key] == 2, d[key] == 3), d[key] == 1))
+            # label 2 is ET
+            result.append(d[key] == 2)
+            d[key] = torch.stack(result, axis=0).float()
+        return d
+
 
 def dict_transform_function():
     """
@@ -32,17 +56,18 @@ def dict_transform_function():
     return mt.Compose(
         [
             mt.LoadImageD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Load NIFTI data
-            mt.EnsureChannelFirstD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Make image and label channel-first
+            mt.EnsureChannelFirstD(keys=("t1", "t1ce", "t2", "flair")),  # Make image and label channel-first
             mt.EnsureTypeD(keys=("t1", "t1ce", "t2", "flair", "seg")),
-            MultiToBinary(keys="seg"),
+            ConvertToMultiChannelBasedOnBratsClassesd("seg"),
+            mt.OrientationD(keys=("t1", "t1ce", "t2", "flair", "seg"), axcodes="RAS"),
+            mt.ScaleIntensityD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Scale image intensity
             mt.ConcatItemsD(keys=("t1", "t1ce", "t2", "flair"), name="image"),
-            mt.ScaleIntensityD(keys=("image", "seg")),  # Scale image intensity
             mt.ResizeD(
                 ("image", "seg"),
                 IMAGE_RESOLUTION,
                 mode=("trilinear", "nearest-exact"),
-            ),  # Resize images
-        ]
+            )
+    ]
     )
 
 
