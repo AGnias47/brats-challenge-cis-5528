@@ -1,7 +1,7 @@
 import monai.transforms as mt
 from monai.transforms import MapTransform
 from config import IMAGE_RESOLUTION
-import torch
+
 
 class MultiToBinary(MapTransform):
     """
@@ -33,6 +33,7 @@ def dict_transform_function():
         [
             mt.LoadImageD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Load NIFTI data
             mt.EnsureChannelFirstD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Make image and label channel-first
+            mt.EnsureTypeD(keys=("t1", "t1ce", "t2", "flair", "seg")),
             MultiToBinary(keys="seg"),
             mt.ConcatItemsD(keys=("t1", "t1ce", "t2", "flair"), name="image"),
             mt.ScaleIntensityD(keys=("image", "seg")),  # Scale image intensity
