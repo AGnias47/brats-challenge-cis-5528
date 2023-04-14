@@ -60,7 +60,7 @@ class NNet:
         self.model.train()
         running_loss = 0
         for batch in dataloader:
-            image, label = batch["seg"].to(self.device), batch["seg"].to(self.device)
+            image, label = batch["image"].to(self.device), batch["seg"].to(self.device)
             self.optim.zero_grad()
             with torch.set_grad_enabled(True):
                 outputs = self.model(image)
