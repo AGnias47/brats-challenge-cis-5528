@@ -3,6 +3,7 @@ from monai.transforms import MapTransform
 from config import IMAGE_RESOLUTION
 import torch
 
+
 class MultiToBinary(MapTransform):
     """
     Converts a multiclass segmentation into a binary class segmentation by setting any class value other than 0 to 1
@@ -20,6 +21,7 @@ class MultiToBinary(MapTransform):
             d[key] = result
         return d
 
+
 class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
     """
     Convert labels to multi channels based on brats classes:
@@ -28,6 +30,10 @@ class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
     label 3 is the necrotic and non-enhancing tumor core
     The possible classes are TC (Tumor core), WT (Whole tumor)
     and ET (Enhancing tumor).
+
+    Resources
+    ---------
+    Taken directly from https://github.com/Project-MONAI/tutorials/blob/main/3d_segmentation/brats_segmentation_3d.ipynb
 
     """
 
@@ -38,9 +44,28 @@ class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
             # merge label 2 and label 3 to construct TC
             result.append(torch.logical_or(d[key] == 2, d[key] == 3))
             # merge labels 1, 2 and 3 to construct WT
-            result.append(torch.logical_or(torch.logical_or(d[key] == 2, d[key] == 3), d[key] == 1))
+            result.append(
+                torch.logical_or(
+                    torch.logical_or(d[key] == 2, d[key] == 3), d[key] == 1
+                )
+            )
             # label 2 is ET
             result.append(d[key] == 2)
+            d[key] = torch.stack(result, axis=0).float()
+        return d
+
+
+class OneHotLabeling(MapTransform):
+    """ "
+    Resources
+    ---------
+    https://github.com/Project-MONAI/tutorials/blob/main/3d_segmentation/brats_segmentation_3d.ipynb
+    """
+
+    def __call__(self, data):
+        d = dict(data)
+        for key in self.keys:
+            result = [d[key] == 4, d[key] == 2, d[key] == 1]
             d[key] = torch.stack(result, axis=0).float()
         return d
 
@@ -56,18 +81,22 @@ def dict_transform_function():
     return mt.Compose(
         [
             mt.LoadImageD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Load NIFTI data
-            mt.EnsureChannelFirstD(keys=("t1", "t1ce", "t2", "flair")),  # Make image and label channel-first
+            mt.EnsureChannelFirstD(
+                keys=("t1", "t1ce", "t2", "flair")
+            ),  # Make image and label channel-first
             mt.EnsureTypeD(keys=("t1", "t1ce", "t2", "flair", "seg")),
-            ConvertToMultiChannelBasedOnBratsClassesd("seg"),
+            OneHotLabeling("seg"),
             mt.OrientationD(keys=("t1", "t1ce", "t2", "flair", "seg"), axcodes="RAS"),
-            mt.ScaleIntensityD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Scale image intensity
+            mt.ScaleIntensityD(
+                keys=("t1", "t1ce", "t2", "flair", "seg")
+            ),  # Scale image intensity
             mt.ConcatItemsD(keys=("t1", "t1ce", "t2", "flair"), name="image"),
             mt.ResizeD(
                 ("image", "seg"),
                 IMAGE_RESOLUTION,
                 mode=("trilinear", "nearest-exact"),
-            )
-    ]
+            ),
+        ]
     )
 
 
