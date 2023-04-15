@@ -19,7 +19,7 @@ from data.containers import train_test_val_dataloaders
 from nn.unet import UNet
 from nn.segresnet import SegResNet
 
-DEFAULT_EPOCHS = 50
+DEFAULT_EPOCHS = 150
 
 
 logging.basicConfig(format="%(asctime)s %(name)-15s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")

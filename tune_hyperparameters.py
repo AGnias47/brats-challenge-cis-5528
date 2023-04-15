@@ -22,8 +22,8 @@ class OptunaUnet(Optunet):
         name = "optuna_unet"
         model = UNet(
             spatial_dims=3,
-            in_channels=1,
-            out_channels=1,
+            in_channels=4,
+            out_channels=3,
             channels=(16, 32, 64, 128, 256),
             strides=(2, 2, 2, 2),
             num_res_units=2,
@@ -36,8 +36,8 @@ class OptunaSegResNet(Optunet):
         name = "optuna_segresnet"
         model = SegResNet(
             spatial_dims=3,
-            in_channels=1,
-            out_channels=1,
+            in_channels=4,
+            out_channels=3,
         )
         super().__init__(name, trial, model)
 

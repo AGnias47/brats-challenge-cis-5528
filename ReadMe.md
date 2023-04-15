@@ -1,6 +1,17 @@
 # CIS 5528 BraTS Project
 
-Repository for all code related to project.
+This project contains the Tumor Segmentation Pipeline used to train a model to segment brain tumors from MRIs as part of
+the [Brain Tumor Segmentation (BraTS) Continuous Challenge](https://www.synapse.org/#!Synapse:syn27046444/wiki/616991).
+Data from the 2021 competition was used. Participation was also used as part of a group project in a Temple University
+graduate Computer Science course.
+
+The pipeline heavily uses the [MONAI](https://monai.io/) module, which uses a [PyTorch](https://pytorch.org/) backend.
+The pipeline trains MONAI's built-in Residual UNet autoencoder neural network with BraTS data, and runs a test loop with
+the best model weights found during training. Models are saved in the `trained_models` directory, and are used in the
+[run_model.py](run_model.py) script.
+
+A GPU is required in order to train a model in a reasonable timeframe. When using a GeForce RTX 3060 Ti 8GB GPU, each
+training epoch took ~20 minutes, so training over 150 epochs took over 2 days.
 
 ## Local Setup
 
@@ -14,49 +25,62 @@ Repository for all code related to project.
 
 ### Download Data
 
-* Download zip of training data from https://drive.google.com/file/d/1TQpeHXTB4YuwNJL0A5oCtVXZ3CnPa4SR/view?usp=share_link
+* Download zip of training data from the BraTS competition
     * If not affiliated with this specific team, request access to competition data from Synapse [here](https://www.synapse.org/#!Synapse:syn27046444/wiki/616992) and download training data zip directly from their site.
 * Move the file to `./local_data`
-* Unzip `unzip RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021.zip`
-    * Exact filename will differ between competition years
+* Unzip the file
+  * `unzip RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021.zip`
+      * Exact filename will differ between competition years
 * Rename top level folder to `train`
 
 ## Train Model
 
 Script for training a model.
 
-Run the `train_model.py` script, selecting one of the parameters in the list for each argument.
-
 ```sh
-python train_model.py --model [unet,segresnet] --epochs [1..n] --image_key [t1,t1ce,t2,flair]
+python train_model.py --model [unet,segresnet] --epochs [1..n]
 ```
 
+By default, `unet` and `150` are used.
+
+### Training Results
+
 The model with the best validation score will be saved to `trained_models/<model name>-model.pth`. Script will print
-test validation score, and results can be viewd via tensorboard by running `tensorboard --logdir runs` or `make results`.
+test validation score, and results can be viewed via TensorBoard by running `tensorboard --logdir runs` or `make results`.
+
+Training Loss and Validation Score data can also be exported from TensorBoard. If exported in a `*.json`, it can be used
+in the [generate_graphs.py](results/generate_graphs.py) script to generate a plot of the loss and validation over each
+epoch. Note that this script is not paramaterized, so paths, etc. will need to be updated within the script, or set to
+match its current contents.
 
 ## Tune Hyperparameters
 
-Script for running an [Optuna](https://optuna.org/) study for determining ideal model hyperparameters. Hyperparameters being tested can be modified within the `nn.optunet.Optunet` class.
+Script for running an [Optuna](https://optuna.org/) study for determining ideal model hyperparameters. Hyperparameters
+being tested can be modified within the `nn.optunet.Optunet` class.
 
-Run the `tune_hyperparameters.py` script, selecting one of the parameters in the list for each argument.
+Run the [tune_hyperparameters.py](tune_hyperparameters.py) script, selecting one of the parameters in the list for each argument.
 
 ```sh
 python tune_hyperparameters.py -m [unet,segresnet] -e [1..n] --trials [1..n]
 ```
 
-Note that the script can be stopped at any time with Ctrl+C and results will be retained in MLflow. To view the results
-of the study in MLflow, run `mlflow server` or `make optuna_results`.
+A model type must be selected, but by default, 50 epochs and 20 trials are used.
+
+Note that the script can be stopped at any time with Ctrl+C and results will be retained in MLflow.
+
+### Hyperparameter Optimization Results
+
+To view the results of the study in MLflow, run `mlflow server` or `make optuna_results`.
 
 ## Run Model
 
 Script for running a trained model on an MRI.
 
-Run the `tune_hyperparameters.py` script, specifying the following arguments.
+Run the [run_model.py](run_model.py) script, specifying the following arguments.
 
 ```sh
-python run_model.py -m <path to model> -i <path to NIfTI file of single channel MRI image> -l <path to NIfTI file of segmentation of MRI image>
+python run_model.py -m <path to model> -i <path to NIfTI subdirectory containing all channel images and segmentation>
 ```
 
 The script will generate a MatPlotLib image including three slices of the input image, the ground truth segmentation,
 and the segmentation generated by the model.
-
