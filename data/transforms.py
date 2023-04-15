@@ -44,11 +44,7 @@ class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
             # merge label 2 and label 3 to construct TC
             result.append(torch.logical_or(d[key] == 2, d[key] == 3))
             # merge labels 1, 2 and 3 to construct WT
-            result.append(
-                torch.logical_or(
-                    torch.logical_or(d[key] == 2, d[key] == 3), d[key] == 1
-                )
-            )
+            result.append(torch.logical_or(torch.logical_or(d[key] == 2, d[key] == 3), d[key] == 1))
             # label 2 is ET
             result.append(d[key] == 2)
             d[key] = torch.stack(result, axis=0).float()
@@ -81,15 +77,11 @@ def dict_transform_function():
     return mt.Compose(
         [
             mt.LoadImageD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Load NIFTI data
-            mt.EnsureChannelFirstD(
-                keys=("t1", "t1ce", "t2", "flair")
-            ),  # Make image and label channel-first
+            mt.EnsureChannelFirstD(keys=("t1", "t1ce", "t2", "flair")),  # Make image and label channel-first
             mt.EnsureTypeD(keys=("t1", "t1ce", "t2", "flair", "seg")),
             OneHotLabeling("seg"),
             mt.OrientationD(keys=("t1", "t1ce", "t2", "flair", "seg"), axcodes="RAS"),
-            mt.ScaleIntensityD(
-                keys=("t1", "t1ce", "t2", "flair", "seg")
-            ),  # Scale image intensity
+            mt.ScaleIntensityD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Scale image intensity
             mt.ConcatItemsD(keys=("t1", "t1ce", "t2", "flair"), name="image"),
             mt.ResizeD(
                 ("image", "seg"),

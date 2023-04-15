@@ -8,6 +8,7 @@ Resources
 """
 
 import argparse
+import logging
 
 import monai
 import torch
@@ -20,6 +21,8 @@ from nn.segresnet import SegResNet
 
 DEFAULT_EPOCHS = 50
 
+
+logging.basicConfig(format="%(asctime)s %(name)-15s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-m",

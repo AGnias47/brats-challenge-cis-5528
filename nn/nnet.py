@@ -1,4 +1,7 @@
 from copy import deepcopy
+from functools import wraps
+import logging
+from time import time
 
 from monai.data import decollate_batch
 from monai.inferers import sliding_window_inference
@@ -12,6 +15,32 @@ from tqdm import tqdm
 
 from config import IMAGE_RESOLUTION, LOCAL_DATA
 from data.transforms import validation_postprocessor
+
+
+logger = logging.getLogger(__name__)
+
+
+def timing(f):
+    """
+    Taken from https://stackoverflow.com/a/27737385/8728749
+    Parameters
+    ----------
+    f
+
+    Returns
+    -------
+
+    """
+
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        logging.info("[%r] %2.4fs" % (f.__name__, te - ts))
+        return result
+
+    return wrap
 
 
 class NNet:
@@ -31,6 +60,7 @@ class NNet:
         else:
             self.scheduler = None
 
+    @timing
     def run_training(
         self,
         train_dataloader,
@@ -56,6 +86,7 @@ class NNet:
     def load_model(self):
         self.model.load_state_dict(torch.load(f"{LOCAL_DATA['model_output']}/{self.name}-model.pth"))
 
+    @timing
     def _train(self, dataloader, epoch=None, summary_writer=None):
         self.model.train()
         running_loss = 0
@@ -77,6 +108,7 @@ class NNet:
             print(f"Epoch {epoch} Training Loss: {total_loss:.4f}")
             print("-" * 25)
 
+    @timing
     def _validation(
         self,
         dataloader,
@@ -110,6 +142,7 @@ class NNet:
                 summary_writer.add_scalar("validation_mean_dice", metric, epoch)
         return best_metric
 
+    @timing
     def test(
         self,
         dataloader,
