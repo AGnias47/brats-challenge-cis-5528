@@ -42,12 +42,18 @@ def dataset_dicts(data_type="train", dataset_path=None):
     if not dataset_path:
         dataset_path = LOCAL_DATA[data_type.casefold()]
     for subfolder in Path(dataset_path).iterdir():
-        scan_name = subfolder.name
-        data = {"name": scan_name}
-        for scan_type in scan_types:
-            data[scan_type] = f"{str(subfolder)}/{scan_name}_{scan_type}.nii.gz"
-        dataset.append(data)
+        dataset.append(dataset_dict(subfolder, scan_types))
     return dataset
+
+
+def dataset_dict(subfolder, scan_types=None):
+    if not scan_types:
+        scan_types = ["flair", "t1ce", "t1", "t2", "seg"]
+    scan_name = subfolder.name
+    data = {"name": scan_name}
+    for scan_type in scan_types:
+        data[scan_type] = f"{str(subfolder)}/{scan_name}_{scan_type}.nii.gz"
+    return data
 
 
 def brats_dataset(data_type, dataset_path=None):

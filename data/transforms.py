@@ -111,6 +111,7 @@ def single_image_transform_function():
     return mt.Compose(
         [
             mt.LoadImage(image_only=True, ensure_channel_first=True),  # Load NIFTI data
+            mt.EnsureType(),
             mt.ScaleIntensity(),  # Scale image intensity
             mt.Resize(IMAGE_RESOLUTION),  # Resize images
         ]
