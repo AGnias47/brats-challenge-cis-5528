@@ -1,4 +1,4 @@
-# CIS 5528 BraTS Project
+# BraTS Tumor Segmentation Pipeline
 
 This project contains the Tumor Segmentation Pipeline used to train a model to segment brain tumors from MRIs as part of
 the [Brain Tumor Segmentation (BraTS) Continuous Challenge](https://www.synapse.org/#!Synapse:syn27046444/wiki/616991).
