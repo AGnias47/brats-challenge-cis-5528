@@ -8,7 +8,7 @@ class SegResNet(NNet):
         model = MonaiSegResNet(
             spatial_dims=3,
             in_channels=4,
-            out_channels=1,
+            out_channels=3,
         )
         optimizer = optim.Adam
         alpha = 0.0065
