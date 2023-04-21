@@ -16,6 +16,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
+from data.transforms import multi_channel_multiclass_label
 from nn.unet import UNet
 from nn.segresnet import SegResNet
 
@@ -55,16 +56,19 @@ else:
     raise ValueError("Invalid model type specified")
 
 train_dataloader, test_dataloader, validation_dataloader = train_test_val_dataloaders(
-    TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs
+    TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, multi_channel_multiclass_label
 )
 
-with SummaryWriter(LOCAL_DATA["tensorboard_logs"]) as summary_writer:
-    nnet.run_training(
-        train_dataloader,
-        validation_dataloader,
-        args.epochs,
-        summary_writer,
-    )
+try:
+    with SummaryWriter(LOCAL_DATA["tensorboard_logs"]) as summary_writer:
+        nnet.run_training(
+            train_dataloader,
+            validation_dataloader,
+            args.epochs,
+            summary_writer,
+        )
+except KeyboardInterrupt:
+    pass  # Allow us to end early and still test
 
 f1 = nnet.test(test_dataloader, summary_writer)
 print(f"F1 score: {f1}")

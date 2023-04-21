@@ -7,6 +7,9 @@ VAL_RATIO = 0.15
 
 # Dataset parameters
 PERSIST_DATASET = False
+IMAGE_KEY = "image"
+LABEL_KEY = "seg"
+SCAN_TYPES = ["flair", "t1ce", "t1", "t2"]
 IMAGE_RESOLUTION = (128, 128, 64)
 
 # Dataloader parameters

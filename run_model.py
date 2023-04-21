@@ -20,7 +20,7 @@ import torch
 
 from config import IMAGE_RESOLUTION
 from data.containers import dataset_dict
-from data.transforms import dict_transform_function, validation_postprocessor
+from data.transforms import multi_channel_multiclass_label, validation_postprocessor
 
 SLICES = 64
 SLICES_TO_SHOW = 4
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load(args.model_path))
     model.to(device)
     data = dataset_dict(Path(args.image_path))
-    transformed_image = dict_transform_function()(data)
+    transformed_image = multi_channel_multiclass_label()(data)
     image, label = transformed_image["image"].unsqueeze(0).to(device), transformed_image["seg"].to(device)
     with torch.no_grad():
         model.eval()
