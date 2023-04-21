@@ -14,6 +14,7 @@ import torch
 
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
+from data.transforms import multi_channel_multiclass_label
 from nn.optunet import Optunet
 
 
@@ -44,8 +45,13 @@ class OptunaSegResNet(Optunet):
 
 def unet_objective(trial):
     model = OptunaUnet(trial)
-    image_key = "flair"  # trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
-    train, _, val = train_test_val_dataloaders(TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, image_key, "seg")
+    train, _, val = train_test_val_dataloaders(
+        TRAIN_RATIO,
+        TEST_RATIO,
+        VAL_RATIO,
+        dataloader_kwargs,
+        multi_channel_multiclass_label,
+    )
     return model.run_training(
         train,
         val,
@@ -55,8 +61,13 @@ def unet_objective(trial):
 
 def segresnet_objective(trial):
     model = OptunaSegResNet(trial)
-    image_key = "flair"  # trial.suggest_categorical("image_key", ["flair", "t1ce", "t1", "t2"])
-    train, _, val = train_test_val_dataloaders(TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, image_key, "seg")
+    train, _, val = train_test_val_dataloaders(
+        TRAIN_RATIO,
+        TEST_RATIO,
+        VAL_RATIO,
+        dataloader_kwargs,
+        multi_channel_multiclass_label,
+    )
     return model.run_training(
         train,
         val,

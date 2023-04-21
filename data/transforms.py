@@ -3,6 +3,8 @@ from monai.transforms import MapTransform
 from config import IMAGE_RESOLUTION
 import torch
 
+from config import IMAGE_KEY, LABEL_KEY, SCAN_TYPES
+
 
 class MultiToBinary(MapTransform):
     """
@@ -22,37 +24,17 @@ class MultiToBinary(MapTransform):
         return d
 
 
-class ConvertToMultiChannelBasedOnBratsClassesd(MapTransform):
-    """
-    Convert labels to multi channels based on brats classes:
-    label 1 is the peritumoral edema
-    label 2 is the GD-enhancing tumor
-    label 3 is the necrotic and non-enhancing tumor core
-    The possible classes are TC (Tumor core), WT (Whole tumor)
-    and ET (Enhancing tumor).
-
-    Resources
-    ---------
-    Taken directly from https://github.com/Project-MONAI/tutorials/blob/main/3d_segmentation/brats_segmentation_3d.ipynb
-
-    """
-
-    def __call__(self, data):
-        d = dict(data)
-        for key in self.keys:
-            result = []
-            # merge label 2 and label 3 to construct TC
-            result.append(torch.logical_or(d[key] == 2, d[key] == 3))
-            # merge labels 1, 2 and 3 to construct WT
-            result.append(torch.logical_or(torch.logical_or(d[key] == 2, d[key] == 3), d[key] == 1))
-            # label 2 is ET
-            result.append(d[key] == 2)
-            d[key] = torch.stack(result, axis=0).float()
-        return d
-
-
 class OneHotLabeling(MapTransform):
-    """ "
+    """
+    Converts the segmentation into a usable one-hot format.
+
+    From: https://www.synapse.org/#!Synapse:syn27046444/wiki/616992
+
+    Annotations comprise the GD-enhancing tumor (ET — label 4), the peritumoral edematous/invaded tissue (ED — label 2),
+    and the necrotic tumor core (NCR — label 1), as described in the latest BraTS summarizing paper. The ground truth
+    data were created after their pre-processing, i.e., co-registered to the same anatomical template, interpolated to
+    the same resolution (1 mm3) and skull-stripped.
+
     Resources
     ---------
     https://github.com/Project-MONAI/tutorials/blob/main/3d_segmentation/brats_segmentation_3d.ipynb
@@ -66,9 +48,9 @@ class OneHotLabeling(MapTransform):
         return d
 
 
-def dict_transform_function():
+def single_channel_binary_label():
     """
-    Transform function for data stored in a dict
+    Transform function for single class image and binary label
 
     Returns
     -------
@@ -76,15 +58,42 @@ def dict_transform_function():
     """
     return mt.Compose(
         [
-            mt.LoadImageD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Load NIFTI data
-            mt.EnsureChannelFirstD(keys=("t1", "t1ce", "t2", "flair")),  # Make image and label channel-first
-            mt.EnsureTypeD(keys=("t1", "t1ce", "t2", "flair", "seg")),
-            OneHotLabeling("seg"),
-            mt.OrientationD(keys=("t1", "t1ce", "t2", "flair", "seg"), axcodes="RAS"),
-            mt.ScaleIntensityD(keys=("t1", "t1ce", "t2", "flair", "seg")),  # Scale image intensity
-            mt.ConcatItemsD(keys=("t1", "t1ce", "t2", "flair"), name="image"),
+            mt.LoadImageD(keys=(IMAGE_KEY, LABEL_KEY)),  # Load NIFTI data
+            MultiToBinary(keys=LABEL_KEY),
+            mt.EnsureChannelFirstD(
+                keys=(IMAGE_KEY, LABEL_KEY)
+            ),  # Make image and label channel-first
+            mt.ScaleIntensityD(keys=IMAGE_KEY),  # Scale image intensity
             mt.ResizeD(
-                ("image", "seg"),
+                (IMAGE_KEY, LABEL_KEY),
+                IMAGE_RESOLUTION,
+                mode=("trilinear", "nearest-exact"),
+            ),  # Resize images
+        ]
+    )
+
+
+def multi_channel_binary_label():
+    """
+    Transform function for multi-class image and binary label
+
+    Returns
+    -------
+    Transform
+    """
+    return mt.Compose(
+        [
+            mt.LoadImageD(keys=(*SCAN_TYPES, LABEL_KEY)),  # Load NIFTI data
+            MultiToBinary(LABEL_KEY),
+            mt.EnsureChannelFirstD(
+                keys=(*SCAN_TYPES, LABEL_KEY)
+            ),  # Make image and label channel-first
+            mt.EnsureTypeD(keys=(*SCAN_TYPES, LABEL_KEY)),
+            mt.OrientationD(keys=SCAN_TYPES, axcodes="RAS"),
+            mt.ScaleIntensityD(keys=SCAN_TYPES),  # Scale image intensity
+            mt.ConcatItemsD(keys=SCAN_TYPES, name=IMAGE_KEY),
+            mt.ResizeD(
+                (IMAGE_KEY, LABEL_KEY),
                 IMAGE_RESOLUTION,
                 mode=("trilinear", "nearest-exact"),
             ),
@@ -92,9 +101,9 @@ def dict_transform_function():
     )
 
 
-def single_image_transform_function():
+def multi_channel_multiclass_label():
     """
-    Transform function for a single image
+    Transform function for multi-class image and multi-class label
 
     Returns
     -------
@@ -102,10 +111,20 @@ def single_image_transform_function():
     """
     return mt.Compose(
         [
-            mt.LoadImage(image_only=True, ensure_channel_first=True),  # Load NIFTI data
-            mt.EnsureType(),
-            mt.ScaleIntensity(),  # Scale image intensity
-            mt.Resize(IMAGE_RESOLUTION),  # Resize images
+            mt.LoadImageD(keys=(*SCAN_TYPES, LABEL_KEY)),  # Load NIFTI data
+            mt.EnsureChannelFirstD(
+                keys=SCAN_TYPES
+            ),  # Make image and label channel-first
+            mt.EnsureTypeD(keys=(*SCAN_TYPES, LABEL_KEY)),
+            OneHotLabeling(LABEL_KEY),
+            mt.OrientationD(keys=SCAN_TYPES, axcodes="RAS"),
+            mt.ScaleIntensityD(keys=SCAN_TYPES),  # Scale image intensity
+            mt.ConcatItemsD(keys=SCAN_TYPES, name=IMAGE_KEY),
+            mt.ResizeD(
+                (IMAGE_KEY, LABEL_KEY),
+                IMAGE_RESOLUTION,
+                mode=("trilinear", "nearest-exact"),
+            ),
         ]
     )
 

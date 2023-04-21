@@ -2,9 +2,8 @@ from pathlib import Path
 
 from torch.utils.data import random_split
 from monai.data import PersistentDataset, Dataset, DataLoader
-from .transforms import dict_transform_function
 
-from config import LOCAL_DATA, PERSIST_DATASET
+from config import LOCAL_DATA, PERSIST_DATASET, SCAN_TYPES, LABEL_KEY
 
 
 def dataset_dicts(data_type="train", dataset_path=None):
@@ -36,9 +35,10 @@ def dataset_dicts(data_type="train", dataset_path=None):
         t2: path to t2 scan
     """
     dataset = list()
-    scan_types = ["flair", "t1ce", "t1", "t2"]
     if data_type.casefold() == "train":
-        scan_types.append("seg")
+        scan_types = SCAN_TYPES + [LABEL_KEY]
+    else:
+        scan_types = SCAN_TYPES
     if not dataset_path:
         dataset_path = LOCAL_DATA[data_type.casefold()]
     for subfolder in Path(dataset_path).iterdir():
@@ -48,7 +48,7 @@ def dataset_dicts(data_type="train", dataset_path=None):
 
 def dataset_dict(subfolder, scan_types=None):
     if not scan_types:
-        scan_types = ["flair", "t1ce", "t1", "t2", "seg"]
+        scan_types = SCAN_TYPES + [LABEL_KEY]
     scan_name = subfolder.name
     data = {"name": scan_name}
     for scan_type in scan_types:
@@ -56,7 +56,7 @@ def dataset_dict(subfolder, scan_types=None):
     return data
 
 
-def brats_dataset(data_type, dataset_path=None):
+def brats_dataset(data_type, transform_function, dataset_path=None):
     """
     Returns a BraTS Dataset object
 
@@ -66,6 +66,7 @@ def brats_dataset(data_type, dataset_path=None):
         train: BraTS training data containing seg files
         validation: BraTS validation data without seg files
         other: will throw an error
+    transform_function: callable
     dataset_path: str
         Path to data; if not defined, uses LOCAL_DATA[data_type]
 
@@ -87,7 +88,7 @@ def brats_dataset(data_type, dataset_path=None):
     Dataset
     """
     dataset = dataset_dicts(data_type, dataset_path)
-    data_transform_function = dict_transform_function()
+    data_transform_function = transform_function()
     if PERSIST_DATASET:
         return PersistentDataset(
             data=dataset,
@@ -102,6 +103,7 @@ def train_test_val_dataloaders(
     test_ratio,
     val_ratio,
     dataloader_kwargs,
+    transform_function,
     dataset_path=None,
 ):
     """
@@ -114,6 +116,7 @@ def train_test_val_dataloaders(
     test_ratio: float
     val_ratio: float
     dataloader_kwargs: dict
+    transform_function: callable
     dataset_path: str
         Path to data; if not defined, uses LOCAL_DATA[data_type]
 
@@ -124,7 +127,7 @@ def train_test_val_dataloaders(
     ratio_total = train_ratio + test_ratio + val_ratio
     if ratio_total < 0.99 or ratio_total > 1.01:
         raise ValueError("Invalid train-test-val ratios provided")
-    dataset = brats_dataset("train", dataset_path)
+    dataset = brats_dataset("train", transform_function, dataset_path)
     train, test, val = random_split(dataset, [train_ratio, test_ratio, val_ratio])
     return (
         DataLoader(train, **dataloader_kwargs),

@@ -13,7 +13,7 @@ import torch.optim
 from torch.optim.lr_scheduler import ExponentialLR
 from tqdm import tqdm
 
-from config import IMAGE_RESOLUTION, LOCAL_DATA
+from config import IMAGE_RESOLUTION, LOCAL_DATA, IMAGE_KEY, LABEL_KEY
 from data.transforms import validation_postprocessor
 
 
@@ -91,7 +91,7 @@ class NNet:
         self.model.train()
         running_loss = 0
         for batch in dataloader:
-            image, label = batch["image"].to(self.device), batch["seg"].to(self.device)
+            image, label = batch[IMAGE_KEY].to(self.device), batch[LABEL_KEY].to(self.device)
             self.optim.zero_grad()
             with torch.set_grad_enabled(True):
                 outputs = self.model(image)
@@ -119,7 +119,7 @@ class NNet:
         self.model.eval()
         with torch.no_grad():
             for batch in dataloader:
-                image, label = batch["image"].to(self.device), batch["seg"].to(self.device)
+                image, label = batch[IMAGE_KEY].to(self.device), batch[LABEL_KEY].to(self.device)
                 self.optim.zero_grad()
                 output = sliding_window_inference(
                     inputs=image,
@@ -153,7 +153,7 @@ class NNet:
         image, label, output = None, None, None
         with torch.no_grad():
             for batch in dataloader:
-                image, label = batch["image"].to(self.device), batch["seg"].to(self.device)
+                image, label = batch[IMAGE_KEY].to(self.device), batch[LABEL_KEY].to(self.device)
                 self.optim.zero_grad()
                 output = sliding_window_inference(
                     inputs=image,
@@ -167,7 +167,7 @@ class NNet:
             metric = self.val_metric.aggregate().item()
             self.val_metric.reset()
             if summary_writer:
-                plot_2d_or_3d_image(image, 1, summary_writer, index=0, tag="image")
+                plot_2d_or_3d_image(image, 1, summary_writer, index=0, tag=IMAGE_KEY)
                 plot_2d_or_3d_image(output, 1, summary_writer, index=0, tag="label")
                 plot_2d_or_3d_image(label, 1, summary_writer, index=0, tag="true_label")
         return metric
