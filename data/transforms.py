@@ -117,7 +117,7 @@ def multi_channel_multiclass_label():
             ),  # Make image and label channel-first
             mt.EnsureTypeD(keys=(*SCAN_TYPES, LABEL_KEY)),
             OneHotLabeling(LABEL_KEY),
-            mt.OrientationD(keys=SCAN_TYPES, axcodes="RAS"),
+            mt.OrientationD(keys=(*SCAN_TYPES, LABEL_KEY), axcodes="RAS"),
             mt.ScaleIntensityD(keys=SCAN_TYPES),  # Scale image intensity
             mt.ConcatItemsD(keys=SCAN_TYPES, name=IMAGE_KEY),
             mt.ResizeD(
