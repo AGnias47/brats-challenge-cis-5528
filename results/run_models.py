@@ -70,30 +70,30 @@ if __name__ == "__main__":
         )
         segresnet_output = validation_postprocessor()(output[0]).to("cpu")
     fig, ax = plt.subplots(SLICES_TO_SHOW - 1, 4, figsize=(8, 8))
-    for i, s in enumerate(range(SLICE_GAP, SLICES - 1, SLICE_GAP)):
+    for i, s in enumerate([24, 28, 32]):
         ax[i, 0].imshow(transformed_image["image"][0, :, :, s], cmap="gray")
-        if s == SLICE_GAP:
+        if s == 24:
             ax[i, 0].set_title("Input Images\n")
         ax[i, 0].set_xlabel(f"Slice {s}")
         ax[i, 0].set_xticks([])
         ax[i, 0].set_yticks([])
 
         ax[i, 1].imshow(transformed_image["seg"][0, :, :, s].detach().cpu())
-        if s == SLICE_GAP:
+        if s == 24:
             ax[i, 1].set_title("Input Labels\n")
         ax[i, 1].set_xlabel(f"Slice {s}")
         ax[i, 1].set_xticks([])
         ax[i, 1].set_yticks([])
 
         ax[i, 2].imshow(unet_output[0, :, :, s].detach().cpu())
-        if s == SLICE_GAP:
+        if s == 24:
             ax[i, 2].set_title("UNet\n")
         ax[i, 2].set_xlabel(f"Slice {s}")
         ax[i, 2].set_xticks([])
         ax[i, 2].set_yticks([])
 
         ax[i, 3].imshow(segresnet_output[0, :, :, s].detach().cpu())
-        if s == SLICE_GAP:
+        if s == 24:
             ax[i, 3].set_title("SegResNet\n")
         ax[i, 3].set_xlabel(f"Slice {s}")
         ax[i, 3].set_xticks([])
