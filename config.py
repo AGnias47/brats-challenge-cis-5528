@@ -5,10 +5,15 @@ TRAIN_RATIO = 0.7
 TEST_RATIO = 0.15
 VAL_RATIO = 0.15
 
+# Model parameters
+LEARNING_RATE = {"unet": 0.15, "segresnet": 0.15}
+
 # Dataset parameters
 PERSIST_DATASET = False
+SINGLE_CHANNEL = False
 IMAGE_KEY = "image"
 LABEL_KEY = "seg"
+SINGLE_CHANNEL_SCAN_TYPE = "flair"
 SCAN_TYPES = ["flair", "t1ce", "t1", "t2"]
 IMAGE_RESOLUTION = (128, 128, 64)
 

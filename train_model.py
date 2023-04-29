@@ -16,14 +16,16 @@ from torch.utils.tensorboard import SummaryWriter
 
 from config import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from data.containers import train_test_val_dataloaders
-from data.transforms import multi_channel_multiclass_label
+from data import transforms
 from nn.unet import UNet
 from nn.segresnet import SegResNet
 
 DEFAULT_EPOCHS = 150
 
 
-logging.basicConfig(format="%(asctime)s %(name)-15s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    format="%(asctime)s %(name)-15s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-m",
@@ -48,15 +50,37 @@ else:
     print("Using GPU")
     dataloader_kwargs = DATALOADER_KWARGS_GPU
 
+if SINGLE_CHANNEL:
+    transform_function = transforms.single_channel_binary_label
+    input_channels = 1
+    output_channels = 1
+else:
+    transform_function = transforms.multi_channel_multiclass_label
+    input_channels = 4
+    output_channels = 3
+
 if args.model.casefold() == "unet":
-    nnet = UNet()
+    nnet = UNet(
+        input_channels=input_channels,
+        output_channels=output_channels,
+        learning_rate=LEARNING_RATE["unet"],
+    )
 elif args.model.casefold() == "segresnet":
-    nnet = SegResNet()
+    nnet = SegResNet(
+        input_channels=input_channels,
+        output_channels=output_channels,
+        learning_rate=LEARNING_RATE["segresnet"],
+    )
 else:
     raise ValueError("Invalid model type specified")
 
 train_dataloader, test_dataloader, validation_dataloader = train_test_val_dataloaders(
-    TRAIN_RATIO, TEST_RATIO, VAL_RATIO, dataloader_kwargs, multi_channel_multiclass_label
+    train_ratio=TRAIN_RATIO,
+    test_ratio=TEST_RATIO,
+    val_ratio=VAL_RATIO,
+    dataloader_kwargs=dataloader_kwargs,
+    transform_function=transform_function,
+    single_channel=SINGLE_CHANNEL,
 )
 
 try:
