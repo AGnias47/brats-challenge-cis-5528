@@ -3,7 +3,7 @@
 This project contains the Tumor Segmentation Pipeline used to train a model to segment brain tumors from MRIs as part of
 the [Brain Tumor Segmentation (BraTS) Continuous Challenge](https://www.synapse.org/#!Synapse:syn27046444/wiki/616991).
 Data from the 2021 competition was used. Participation was also used as part of a group project in a Temple University
-graduate Computer Science course.
+graduate Computer Science course. The final report can be found [here](results/report.pdf).
 
 The pipeline heavily uses the [MONAI](https://monai.io/) module, which uses a [PyTorch](https://pytorch.org/) backend.
 The pipeline trains MONAI's built-in Residual UNet autoencoder neural network with BraTS data, and runs a test loop with
@@ -43,7 +43,7 @@ python train_model.py --model [unet,segresnet] --epochs [1..n]
 
 By default, `unet` and `150` are used.
 
-### Training Results
+### View Training Results
 
 The model with the best validation score will be saved to `trained_models/<model name>-model.pth`. Script will print
 test validation score, and results can be viewed via TensorBoard by running `tensorboard --logdir runs` or `make results`.
@@ -68,7 +68,7 @@ A model type must be selected, but by default, 50 epochs and 20 trials are used.
 
 Note that the script can be stopped at any time with Ctrl+C and results will be retained in MLflow.
 
-### Hyperparameter Optimization Results
+### View Hyperparameter Optimization Results
 
 To view the results of the study in MLflow, run `mlflow server` or `make optuna_results`.
 
