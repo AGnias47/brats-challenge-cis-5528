@@ -37,7 +37,7 @@ def timing(f):
         ts = time()
         result = f(*args, **kw)
         te = time()
-        logging.info("[%r] %2.4fs" % (f.__name__, te - ts))
+        logger.info("[%r] %2.4fs" % (f.__name__, te - ts))
         return result
 
     return wrap
