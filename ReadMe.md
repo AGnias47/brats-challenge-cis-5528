@@ -1,7 +1,8 @@
 # BraTS Tumor Segmentation Pipeline
 
 This project contains the Tumor Segmentation Pipeline used to train a model to segment brain tumors from MRIs as part of
-the [Brain Tumor Segmentation (BraTS) Continuous Challenge](https://www.synapse.org/#!Synapse:syn27046444/wiki/616991).
+the [Brain Tumor Segmentation (BraTS) Continuous Challenge](https://www.synapse.org/#!Synapse:syn27046444/wiki/616991).  Data used in this repo were obtained as part of the 
+Brain Tumor Segmentation (BraTS) Challenge project through Synapse ID (syn51156910).
 Data from the 2021 competition was used. Participation was also used as part of a group project in a Temple University
 graduate Computer Science course. The final report can be found [here](results/report.pdf).
 
