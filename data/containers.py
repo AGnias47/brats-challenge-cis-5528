@@ -37,12 +37,7 @@ def dataset_dicts(data_type="train", single_channel=False, dataset_path=None):
     Returns
     -------
     list of dict of the form
-        name: name of subdirectory containing NIFTI files
-        flair: path to flair scan
-        seg: path to seg scan
-        t1ce: path to t1ce scan
-        t1: path to t1 scan
-        t2: path to t2 scan
+        name: name of subdirectory containing NIFTI files, ex. t1c: path to t1c scan
     """
     dataset = list()
     if single_channel:
@@ -67,7 +62,7 @@ def dataset_dict(subfolder, scan_types=None):
     scan_name = subfolder.name
     data = {"name": scan_name}
     for scan_type in scan_types:
-        data[scan_type] = f"{str(subfolder)}/{scan_name}_{scan_type}.nii.gz"
+        data[scan_type] = f"{str(subfolder)}/{scan_name}-{scan_type}.nii.gz"
     return data
 
 

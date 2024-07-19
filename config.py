@@ -13,8 +13,8 @@ PERSIST_DATASET = False
 SINGLE_CHANNEL = False
 IMAGE_KEY = "image"
 LABEL_KEY = "seg"
-SINGLE_CHANNEL_SCAN_TYPE = "flair"
-SCAN_TYPES = ["flair", "t1ce", "t1", "t2"]
+SINGLE_CHANNEL_SCAN_TYPE = "t1c"
+SCAN_TYPES = ["t1c", "t1n", "t2f", "t2w"]
 IMAGE_RESOLUTION = (128, 128, 64)
 
 # Dataloader parameters
