@@ -1,37 +1,37 @@
 # BraTS Tumor Segmentation Pipeline
 
-This project contains the Tumor Segmentation Pipeline used to train a model to segment brain tumors from MRIs as part of
-the [Brain Tumor Segmentation (BraTS) Continuous Challenge](https://www.synapse.org/#!Synapse:syn27046444/wiki/616991).  Data used in this repo were obtained as part of the 
-Brain Tumor Segmentation (BraTS) Challenge project through Synapse ID (syn51156910).
-Data from the 2021 competition was used. Participation was also used as part of a group project in a Temple University
-graduate Computer Science course. The final report can be found [here](results/report.pdf).
+This project contains the Tumor Segmentation Pipeline used to train a model for brain tumor segmentation using data from various [Synapse BraTS challenges](https://www.synapse.org/Synapse:syn53708126/wiki/626320). This pipeline was initially created for a group project in Temple University's CIS 5528, Predictive Modeling in Biomedicine. The final report for this project can be found [here](results/report.pdf).
 
-The pipeline heavily uses the [MONAI](https://monai.io/) module, which uses a [PyTorch](https://pytorch.org/) backend.
-The pipeline trains MONAI's built-in Residual UNet autoencoder neural network with BraTS data, and runs a test loop with
-the best model weights found during training. Models are saved in the `trained_models` directory, and are used in the
-[run_model.py](run_model.py) script.
+## Data
+
+For this class, data from the [BraTS Continuous Evaluation](https://www.synapse.org/Synapse:syn27046444/wiki/616571) competition was used. The original data used is no longer available, but the competition is now part of [BraTS 2023 - Adult Glioma](https://www.synapse.org/Synapse:syn51156910/wiki/622351). Data from that competition is available and supported by this repo.
+
+## Implementation
+
+The pipeline heavily uses the [MONAI](https://monai.io/) module, which uses a [PyTorch](https://pytorch.org/) backend. The pipeline can be configured to train either MONAI's built-in UNet model or a SegResNet model. The pipeline runs a test loop with the best model weights found during training. Models are saved in the `trained_models` directory, and can be used in the [run_model.py](run_model.py) script.
+
+## Ongoing Support
+
+Currently, there are no plans to support future iterations of the BraTS competition. The update supporting 2023 data was mainly done because the original training data was lost and could not be recovered through Synapse. That being said, updates needed between competition years should be minimal. Commit [7a96658b](https://github.com/AGnias47/brats-challenge-cis-5528/commit/7a96658b25ee07bff311ad57a6a91b7253f330e4) shows the changes that were necessary for `config.py` and `data/containers.py` to support the updated dataset.
+
+## Local Setup
+
+### Hardware
 
 A GPU is required in order to train a model in a reasonable timeframe. When using a GeForce RTX 3060 Ti 8GB GPU, each
 training epoch took ~20 minutes, so training over 150 epochs took over 2 days.
 
-## Local Setup
-
 ### Python Setup
 
-* Install pyenv via instructions at https://github.com/pyenv/pyenv-virtualenv and update .*rc file accordingly
-* Install Python 3.9 `pyenv install 3.9.16`
-* Create venv `pyenv virtualenv 3.9.16 brats`
-* Activate venv `pyenv local brats`
-* Install dependencies `pip install -r requirements.txt`
+The repo was built with Python 3.9 and currently supports Python 3.12. Dependencies can be installed via the requirements file, though it is recommended PyTorch be installed first following [PyTorch's installation instructions](https://pytorch.org/get-started/locally/).
 
 ### Download Data
 
 * Download zip of training data from the BraTS competition
-    * If not affiliated with this specific team, request access to competition data from Synapse [here](https://www.synapse.org/#!Synapse:syn27046444/wiki/616992) and download training data zip directly from their site.
+    * Request access to competition data from Synapse [here](https://www.synapse.org/Synapse:syn51156910/wiki/627000) and download the training data zip directly from their site.
 * Move the file to `./local_data`
 * Unzip the file
-  * `unzip RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021.zip`
-      * Exact filename will differ between competition years
+  * `unzip ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData.zip`
 * Rename top level folder to `train`
 
 ## Train Model
