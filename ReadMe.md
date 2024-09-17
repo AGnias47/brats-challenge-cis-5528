@@ -4,7 +4,7 @@ This project contains the Tumor Segmentation Pipeline used to train a model for 
 
 ## Data
 
-For this class, data from the [BraTS Continuous Evaluation](https://www.synapse.org/Synapse:syn27046444/wiki/616571) competition was used. The original data used is no longer available, but the competition is now part of [BraTS 2023 - Adult Glioma](https://www.synapse.org/Synapse:syn51156910/wiki/622351). Data from that competition is available and supported by this repo.
+For this class, data from the [BraTS 2021 Challenge](https://www.synapse.org/Synapse:syn25829067/wiki/610863) was used. The original data used is no longer available, but the competition is now part of [BraTS 2023 - Adult Glioma](https://www.synapse.org/Synapse:syn51156910/wiki/622351). Data from that competition is available and supported by this repo.
 
 ## Implementation
 
