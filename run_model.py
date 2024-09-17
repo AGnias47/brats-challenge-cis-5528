@@ -33,7 +33,7 @@ if __name__ == "__main__":
         "-i",
         "--image_path",
         type=str,
-        default="local_data/train/BraTS2021_00000",
+        default="local_data/train/BraTS-GLI-00000-000",
     )
     args = parser.parse_args()
     monai.utils.set_determinism(seed=42, additional_settings=None)
