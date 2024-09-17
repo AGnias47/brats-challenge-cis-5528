@@ -92,8 +92,8 @@ if __name__ == "__main__":
                 args.epochs,
                 summary_writer,
             )
-    except KeyboardInterrupt:
-        pass  # Allow us to end early and still test
+    except KeyboardInterrupt:  # Allow us to end early and still test
+        print("Received KeyboardInterrupt. Ending Training now and testing the model.")
 
     f1 = nnet.test(test_dataloader, summary_writer)
     print(f"F1 score: {f1}")
